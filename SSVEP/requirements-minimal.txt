@@ -1,8 +1,0 @@
-# Minimal requirements for core SSVEP detection (without visual stimulus)
-# Use this if you only need the detection system without PsychoPy
-
-numpy>=1.21.0
-scipy>=1.7.0
-scikit-learn>=1.0
-matplotlib>=3.5.0
-brainflow>=5.13.0

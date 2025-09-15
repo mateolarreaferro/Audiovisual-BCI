@@ -206,6 +206,8 @@ class StableVoteFilter:
         self.current_vote = None
         self.vote_start_time = None
         self.stable_decision = None
+        self.last_stable_time = None
+        self.reselection_cooldown_ms = 1500  # Cooldown before allowing new selection
         
     def update(self, new_vote: Any) -> Optional[Any]:
         """
@@ -218,6 +220,22 @@ class StableVoteFilter:
             Stable decision if available, None otherwise
         """
         current_time = time.time() * 1000  # Convert to milliseconds
+        
+        # Check if we're in cooldown period after a selection
+        if self.last_stable_time is not None:
+            if current_time - self.last_stable_time < self.reselection_cooldown_ms:
+                # During cooldown, return the stable decision only once
+                if self.stable_decision is not None:
+                    stable_result = self.stable_decision
+                    self.stable_decision = None  # Clear to avoid repeated returns
+                    return stable_result
+                return None
+            else:
+                # Cooldown expired, fully reset for new selection
+                self.stable_decision = None
+                self.last_stable_time = None
+                self.current_vote = None
+                self.vote_start_time = None
         
         if new_vote != self.current_vote:
             # New vote - reset timer
@@ -232,8 +250,9 @@ class StableVoteFilter:
                 if self.stable_decision != new_vote:
                     # New stable decision
                     self.stable_decision = new_vote
+                    self.last_stable_time = current_time
                     logger.info(f"[STABLE] Decision: {new_vote} (held for {hold_time:.0f}ms)")
-                return new_vote
+                    return new_vote
         
         return None
     
@@ -242,6 +261,7 @@ class StableVoteFilter:
         self.current_vote = None
         self.vote_start_time = None
         self.stable_decision = None
+        self.last_stable_time = None  # Allow immediate reselection after reset
 
 
 def format_detection_output(frequency: float, snr: float, all_scores: dict, 
