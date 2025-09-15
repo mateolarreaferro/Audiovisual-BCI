@@ -58,11 +58,11 @@ class IntegratedSSVEP:
         self.n_channels = None
         self.buffer = deque(maxlen=500)  # Will be resized after connection
         
-        # Detection parameters
-        self.snr_threshold = 0.35  # Threshold for FBCCA scores
-        self.margin_ratio = 1.15
-        self.ema_alpha = 0.3
-        self.hold_ms = 500
+        # Detection parameters - optimized for better sensitivity
+        self.snr_threshold = 0.25  # Lower threshold for better sensitivity
+        self.margin_ratio = 1.10  # Less strict margin for easier detection
+        self.ema_alpha = 0.4  # Faster response
+        self.hold_ms = 400  # Shorter hold time for quicker selection
 
         # Calibration and training data
         self.training_data = {freq: [] for freq in self.frequencies}
@@ -86,6 +86,7 @@ class IntegratedSSVEP:
         
         # Calibration state
         self.baseline_data = []
+        self.calibration_flicker_start = None  # Track flicker timing during calibration
         
         # Initialize Pygame
         pygame.init()
@@ -231,6 +232,7 @@ class IntegratedSSVEP:
         self.calibration_step = 0
         self.calibration_start_time = None
         self.calibration_message = ""
+        self.calibration_flicker_start = None  # Initialize flicker timing
 
         # Reset data containers
         self.training_data = {freq: [] for freq in self.frequencies}
@@ -238,9 +240,9 @@ class IntegratedSSVEP:
         
         # Steps: 0=baseline, 1=left freq, 2=right freq
         self.calibration_steps = [
-            {"message": "Relax and look at the center cross", "duration": 10, "freq_index": None},
-            {"message": f"Look at the LEFT box ({self.frequencies[0]}Hz)", "duration": 15, "freq_index": 0},
-            {"message": f"Look at the RIGHT box ({self.frequencies[1]}Hz)", "duration": 15, "freq_index": 1},
+            {"message": "Relax and look at the center cross", "duration": 8, "freq_index": None},
+            {"message": f"Look at the FLASHING LEFT box ({self.frequencies[0]}Hz)", "duration": 20, "freq_index": 0},
+            {"message": f"Look at the FLASHING RIGHT box ({self.frequencies[1]}Hz)", "duration": 20, "freq_index": 1},
         ]
         
         self.start_calibration_step()
@@ -255,6 +257,12 @@ class IntegratedSSVEP:
         self.calibration_message = step["message"]
         self.calibration_start_time = time.time()
         self.calibration_duration = step["duration"]
+        
+        # Initialize flicker timing for stimulus steps
+        if step["freq_index"] is not None:
+            self.calibration_flicker_start = time.time()
+        else:
+            self.calibration_flicker_start = None
         
         logger.info(f"Calibration step {self.calibration_step + 1}: {self.calibration_message}")
     
@@ -326,11 +334,19 @@ class IntegratedSSVEP:
     def finish_calibration(self):
         """Complete calibration by training classifier and setting thresholds"""
         if self.classifier and any(self.training_data.values()):
-            self.classifier.train(self.training_data)
-            self.calculate_thresholds()
+            # Check if we have enough training data
+            total_segments = sum(len(segments) for segments in self.training_data.values())
+            logger.info(f"Training with {total_segments} total segments")
+            
+            if total_segments > 0:
+                self.classifier.train(self.training_data)
+                self.calculate_thresholds()
+            else:
+                logger.warning("No training data collected during calibration!")
 
         self.calibrating = False
         self.calibration_step = -1
+        self.calibration_flicker_start = None
         logger.info("Calibration complete!")
 
         # Clear baseline data to save memory
@@ -346,8 +362,11 @@ class IntegratedSSVEP:
                 scores.append(features.get(freq, 0))
 
         if scores:
-            self.snr_threshold = max(0.2, np.percentile(scores, 50))
+            # Use a lower percentile for better sensitivity
+            self.snr_threshold = max(0.15, np.percentile(scores, 30))
             logger.info(f"Adaptive score threshold: {self.snr_threshold:.2f}")
+        else:
+            logger.warning("No scores calculated from training data")
     
     def detection_thread(self):
         """Background thread for SSVEP detection"""
@@ -387,18 +406,23 @@ class IntegratedSSVEP:
                     )
                     scores = self.smoothed_powers
 
-                    # Detection logic
+                    # Enhanced detection logic with better sensitivity
                     max_idx = int(np.argmax(scores))
                     max_score = scores[max_idx]
                     second_best = np.partition(scores, -2)[-2] if len(scores) > 1 else 0
 
-                    if (max_score > self.snr_threshold and
-                        max_score > second_best * self.margin_ratio):
-
-                        stable = self.vote_filter.update(max_idx)
-
-                        # Confidence directly from score
-                        self.confidence = max_score
+                    # More lenient detection criteria
+                    if max_score > self.snr_threshold:
+                        # Check if significantly better than second best
+                        if second_best == 0 or max_score > second_best * self.margin_ratio:
+                            stable = self.vote_filter.update(max_idx)
+                            # Normalize confidence to 0-1 range
+                            self.confidence = min(1.0, max_score)
+                        else:
+                            # Still detecting but not stable yet
+                            self.vote_filter.update(max_idx)
+                            stable = None
+                            self.confidence = min(1.0, max_score * 0.7)
 
                         # Send detection result
                         self.detection_queue.put({
@@ -467,8 +491,7 @@ class IntegratedSSVEP:
         if not hasattr(self, 'calibration_message'):
             return
         
-        # Clear screen with darker background
-        self.screen.fill((64, 64, 64))
+        # Don't clear screen here - it's already cleared in the main loop
         
         # Title
         title = f"CALIBRATION - Step {self.calibration_step + 1} of {len(self.calibration_steps)}"
@@ -525,39 +548,58 @@ class IntegratedSSVEP:
                            (center_x, center_y - cross_size),
                            (center_x, center_y + cross_size), 4)
         
-        elif self.calibration_step > 0:  # Show boxes with highlighting
-            # Draw both boxes but highlight the target
-            for i, (pos, label) in enumerate([(self.left_pos, self.labels[0]),
-                                              (self.right_pos, self.labels[1])]):
-                if i == self.calibration_steps[self.calibration_step]["freq_index"]:
-                    # Highlight target box
-                    color = self.yellow
-                    border_color = self.red
-                    border_width = 6
-                else:
-                    # Normal box
-                    color = (100, 100, 100)
-                    border_color = self.white
-                    border_width = 2
+        elif self.calibration_step > 0:  # Show FLICKERING boxes during calibration
+            # Calculate flicker states if we have a flicker start time
+            if self.calibration_flicker_start:
+                elapsed = time.time() - self.calibration_flicker_start
                 
-                pygame.draw.rect(self.screen, color,
-                               (pos[0], pos[1], self.box_size, self.box_size))
-                pygame.draw.rect(self.screen, border_color,
-                               (pos[0], pos[1], self.box_size, self.box_size), border_width)
-                
-                # Label
-                text = self.font.render(label, True, self.white)
-                text_rect = text.get_rect(centerx=pos[0] + self.box_size//2,
-                                          bottom=pos[1] - 20)
-                self.screen.blit(text, text_rect)
+                # Draw both boxes with appropriate flickering
+                for i, (pos, label) in enumerate([(self.left_pos, self.labels[0]),
+                                                  (self.right_pos, self.labels[1])]):
+                    
+                    target_idx = self.calibration_steps[self.calibration_step]["freq_index"]
+                    
+                    if i == target_idx:
+                        # This box should flicker at its frequency
+                        freq = self.frequencies[i]
+                        phase = np.sin(2 * np.pi * freq * elapsed)
+                        intensity = int((phase + 1) * 127.5)
+                        color = (intensity, intensity, intensity)
+                        border_color = self.green if intensity > 127 else self.yellow
+                        border_width = 6
+                    else:
+                        # Non-target box - dim static
+                        color = (50, 50, 50)
+                        border_color = (100, 100, 100)
+                        border_width = 2
+                    
+                    pygame.draw.rect(self.screen, color,
+                                   (pos[0], pos[1], self.box_size, self.box_size))
+                    pygame.draw.rect(self.screen, border_color,
+                                   (pos[0], pos[1], self.box_size, self.box_size), border_width)
+                    
+                    # Label
+                    text_color = self.white if i == target_idx else (150, 150, 150)
+                    text = self.font.render(label, True, text_color)
+                    text_rect = text.get_rect(centerx=pos[0] + self.box_size//2,
+                                              bottom=pos[1] - 20)
+                    self.screen.blit(text, text_rect)
             
-            # Show frequency for target box
-            target_freq = self.frequencies[self.calibration_steps[self.calibration_step]["freq_index"]]
-            freq_text = f"Focus on {target_freq}Hz stimulus"
-            text = self.font.render(freq_text, True, self.yellow)
-            text_rect = text.get_rect(centerx=self.window_size[0]//2,
-                                      bottom=self.window_size[1] - 50)
-            self.screen.blit(text, text_rect)
+            # Show frequency info and instruction
+            if self.calibration_flicker_start:
+                target_freq = self.frequencies[self.calibration_steps[self.calibration_step]["freq_index"]]
+                freq_text = f"Focus on the FLASHING {target_freq}Hz stimulus"
+                text = self.font.render(freq_text, True, self.yellow)
+                text_rect = text.get_rect(centerx=self.window_size[0]//2,
+                                          bottom=self.window_size[1] - 50)
+                self.screen.blit(text, text_rect)
+                
+                # Add a small indicator showing the flashing is active
+                indicator_text = "● RECORDING SSVEP RESPONSE"
+                text = self.small_font.render(indicator_text, True, self.red)
+                text_rect = text.get_rect(centerx=self.window_size[0]//2,
+                                          bottom=self.window_size[1] - 20)
+                self.screen.blit(text, text_rect)
     
     def draw_boxes(self, left_color, right_color):
         """Draw flickering boxes with selection feedback"""
@@ -726,20 +768,21 @@ class IntegratedSSVEP:
                         if not self.stimulating:
                             self.calibration_phase()
             
-            # Draw interface
-            self.draw_interface()
+            # Draw base interface
+            if not self.calibrating:
+                self.draw_interface()
             
-            # Draw stimulus boxes
-            if self.stimulating and start_time:
+            # Draw stimulus boxes or calibration
+            if self.calibrating:
+                # For calibration, we handle everything in one method
+                self.draw_calibration_interface()
+            elif self.stimulating and start_time:
+                # Normal operation - flickering boxes
                 left_color, right_color = self.update_flicker(start_time)
                 self.draw_boxes(left_color, right_color)
-            elif not self.calibrating:
+            else:
                 # Static boxes when not stimulating
                 self.draw_boxes(self.white, self.white)
-            
-            # Calibration display
-            if self.calibrating:
-                self.draw_calibration_interface()
             
             # Update display
             pygame.display.flip()

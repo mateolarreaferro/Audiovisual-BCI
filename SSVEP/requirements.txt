@@ -8,6 +8,7 @@ scikit-learn>=1.0
 
 # Signal processing and visualization
 matplotlib>=3.5.0
+mne>=1.0.0  # MNE-Python for EEG data processing
 
 # EEG/BCI hardware interface
 brainflow>=5.13.0
