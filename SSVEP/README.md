@@ -159,6 +159,42 @@ Keep impedances low and stable. Use conductive gel or saline as appropriate.
 - Ensure monitor refresh is truly 60 Hz
 - Keep the PsychoPy window active. Avoid screen recording overlays
 
+## Offline Training with Public Datasets
+
+If you are just getting started or want a stronger initialization before
+recording your own calibration data, you can pre-train the classifier using the
+"Benchmark SSVEP" dataset released by Nakanishi et al. (PLoS ONE, 2015). This
+dataset contains multi-subject recordings at many stimulation frequencies,
+including 10 Hz and 15 Hz.
+
+1. Download the dataset archive from
+   [https://figshare.com/articles/dataset/Benchmark_Dataset_for_SSVEP-based_BCI/2003670](https://figshare.com/articles/dataset/Benchmark_Dataset_for_SSVEP-based_BCI/2003670)
+   and extract the `.mat` files to a local folder.
+2. Run the offline trainer to build TRCA/FBTRCA templates and save a
+   calibration session:
+
+   ```bash
+   cd SSVEP
+   python offline_trca_training.py \
+       --dataset-root /path/to/extracted/dataset \
+       --subjects S1 S2 \
+       --frequencies 10 15 \
+       --window 2.0 --start-offset 0.5
+   ```
+
+   The script prints cross-validation accuracy, selects the most informative
+   channels, estimates an adaptive detection threshold, and stores the resulting
+   calibration in `calibration_data/` so it can be loaded via the main UI (`L`
+   key).
+3. Launch `run_integrated_ssvep.py`, press `L`, and choose the newly created
+   calibration session to bootstrap real-time detection before collecting your
+   own data.
+
+The offline training workflow relies on the improved TRCA/FBTRCA classifier in
+`ssvep_bci/modules/ssvep_classifier.py`, which tends to offer sharper class
+separation than the original PSD-only approach when enough template trials are
+available.
+
 ## Definition of Done
 
 - Real-time classification among 3–4 targets with visible logs of predicted frequency
