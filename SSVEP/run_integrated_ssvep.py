@@ -116,7 +116,7 @@ class IntegratedSSVEP:
             'HARDWARE': {'sampling_rate': self.fs},
             'STIMULUS': {'frequencies': self.frequencies},
             'CLASSIFIER': {
-                'type': 'FBCCA',
+                'type': 'FBTRCA',
                 'n_harmonics': HARMONICS,
                 'filter_bank': {'enabled': True, 'n_filters': 5, 'filter_order': 4},
                 'window_length': WINDOW_SEC,
