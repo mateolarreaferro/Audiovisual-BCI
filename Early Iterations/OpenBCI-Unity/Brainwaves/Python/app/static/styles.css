@@ -1,0 +1,181 @@
+/* EEG Terrain Visualizer Styles */
+
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-radius: 8px;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #6c757d, #495057);
+    color: white;
+    border-radius: 8px 8px 0 0 !important;
+}
+
+.form-range::-webkit-slider-thumb {
+    background: #0d6efd;
+}
+
+.form-range::-moz-range-thumb {
+    background: #0d6efd;
+}
+
+.progress {
+    background-color: #e9ecef;
+    border-radius: 4px;
+}
+
+.progress-bar {
+    transition: width 0.3s ease;
+}
+
+/* Status indicators */
+.badge.bg-success {
+    animation: pulse-green 2s infinite;
+}
+
+.badge.bg-danger {
+    animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-green {
+    0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+}
+
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+}
+
+/* Button styles */
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border: none;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #dc3545, #fd7e14);
+    border: none;
+}
+
+.btn-info {
+    background: linear-gradient(135deg, #17a2b8, #6f42c1);
+    border: none;
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #ffc107, #fd7e14);
+    border: none;
+}
+
+/* EEG Band Colors */
+.bg-alpha { background-color: #6f42c1 !important; }
+.bg-beta { background-color: #28a745 !important; }
+.bg-theta { background-color: #17a2b8 !important; }
+.bg-delta { background-color: #ffc107 !important; }
+.bg-arousal { background-color: #dc3545 !important; }
+
+/* Animation for value updates */
+.progress-bar {
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.badge {
+    transition: all 0.3s ease;
+}
+
+/* Scrollable error log */
+#error-log {
+    font-family: 'Courier New', monospace;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 8px;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #212529;
+        color: #dee2e6;
+    }
+    
+    .card {
+        background-color: #343a40;
+        color: #dee2e6;
+    }
+    
+    .form-control, .form-select {
+        background-color: #495057;
+        border-color: #6c757d;
+        color: #dee2e6;
+    }
+    
+    .progress {
+        background-color: #495057;
+    }
+    
+    #error-log {
+        background-color: #495057;
+        border-color: #6c757d;
+        color: #dee2e6;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+    
+    .card {
+        margin-bottom: 16px;
+    }
+    
+    .row {
+        margin-left: -8px;
+        margin-right: -8px;
+    }
+    
+    .col-md-3, .col-md-4, .col-md-6, .col-md-8 {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+}
+
+/* Loading state */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Connection status colors */
+.status-connected {
+    background-color: #28a745 !important;
+}
+
+.status-disconnected {
+    background-color: #dc3545 !important;
+}
+
+.status-connecting {
+    background-color: #ffc107 !important;
+}
