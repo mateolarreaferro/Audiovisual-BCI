@@ -13,7 +13,7 @@ class OSCSender:
         self.client: Optional[SimpleUDPClient] = None
         self.enabled: bool = False
         self.send_raw: bool = True
-        self.send_bands: bool = False
+        self.send_bands_enabled: bool = False
         # Max floats per OSC message to avoid UDP size limits
         # Conservative limit: ~1000 floats (4000 bytes) to stay well under UDP limits
         self.max_floats_per_message = 1000
@@ -24,7 +24,7 @@ class OSCSender:
         self.port = port
         self.enabled = enabled
         self.send_raw = send_raw
-        self.send_bands = send_bands
+        self.send_bands_enabled = send_bands
         if enabled:
             self.client = SimpleUDPClient(self.ip, self.port)
         else:
@@ -70,7 +70,7 @@ class OSCSender:
         We send per-channel messages: /eeg/bands/CH1, /eeg/bands/CH2, etc.
         Each message contains [delta, theta, alpha, beta, gamma] for that channel.
         """
-        if not self._ensure_client() or not self.send_bands:
+        if not self._ensure_client() or not self.send_bands_enabled:
             return
 
         try:

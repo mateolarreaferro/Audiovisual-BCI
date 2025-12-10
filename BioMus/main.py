@@ -212,17 +212,33 @@ async def ws_stream(ws: WebSocket):
                         )
 
                 elif config["mode"] == "bands":
-                    channels, band_names, values = service.get_band_powers(window_sec=config["window_sec"])
-                    if channels:
-                        service.osc_push_bands(channels, band_names, values)
-                        await ws.send_json(
-                            {
-                                "type": "bands",
-                                "channels": channels,
-                                "bands": band_names,
-                                "values": values,
-                            }
-                        )
+                    try:
+                        channels, band_names, values = service.get_band_powers(window_sec=config["window_sec"])
+                        if channels and len(channels) > 0 and len(values) > 0:
+                            service.osc_push_bands(channels, band_names, values)
+                            await ws.send_json(
+                                {
+                                    "type": "bands",
+                                    "channels": channels,
+                                    "bands": band_names,
+                                    "values": values,
+                                }
+                            )
+                        else:
+                            # Send empty data to prevent UI freeze
+                            await ws.send_json(
+                                {
+                                    "type": "bands",
+                                    "channels": [],
+                                    "bands": band_names if band_names else [],
+                                    "values": [],
+                                }
+                            )
+                    except Exception as e:
+                        print(f"Error in bands calculation: {e}")
+                        import traceback
+                        traceback.print_exc()
+                        await ws.send_json({"type": "error", "message": f"Bands error: {str(e)}"})
 
                 await asyncio.sleep(config["send_interval_ms"] / 1000.0)
 

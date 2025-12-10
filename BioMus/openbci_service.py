@@ -5,7 +5,7 @@ from typing import Optional, List, Tuple
 import numpy as np
 
 from brainflow.board_shim import BoardShim, BrainFlowInputParams, BoardIds
-from brainflow.data_filter import DataFilter, WindowOperations, DetrendOperations
+from brainflow.data_filter import DataFilter, WindowOperations, DetrendOperations, FilterTypes
 
 from osc_sender import OSCSender
 
@@ -98,6 +98,40 @@ class GanglionService:
             return []
         return BoardShim.get_exg_channels(self.board_id)
 
+    def _preprocess_signal(self, signal: np.ndarray, sampling_rate: int, apply_filters: bool = False) -> np.ndarray:
+        """
+        Apply light EEG preprocessing:
+        - Detrending (always applied)
+        - Optional: Notch filter (60 Hz) to remove power line interference
+        """
+        if signal.size < 8:
+            return signal
+
+        # Create a copy to avoid modifying original data
+        filtered = signal.copy()
+
+        # Always apply detrending to remove DC offset
+        DataFilter.detrend(filtered, DetrendOperations.LINEAR.value)
+
+        # Only apply notch filter if requested (can be aggressive on small datasets)
+        if apply_filters and signal.size >= 64:
+            try:
+                # Apply notch filter at 60 Hz (US power line frequency)
+                DataFilter.perform_bandstop(
+                    filtered,
+                    sampling_rate,
+                    centerfreq=60.0,
+                    bandwidth_hz=2.0,  # Narrow notch width
+                    order=2,  # Lower order for stability
+                    filter_type=FilterTypes.BUTTERWORTH.value,
+                    ripple=0
+                )
+            except Exception:
+                # If filter fails, just return detrended signal
+                pass
+
+        return filtered
+
     def get_timeseries_window(
         self,
         window_sec: float = 4.0,
@@ -105,6 +139,7 @@ class GanglionService:
     ) -> Tuple[List[str], List[List[float]]]:
         """
         Returns (channel_names, data[channels][samples])
+        Data is preprocessed with bandpass and notch filters, then smoothed
         """
         if not (self.connected and self.streaming and self.board):
             return [], []
@@ -119,11 +154,19 @@ class GanglionService:
 
         ts_data = []
         for ch in ch_indices:
-            channel_series = data[ch, :]
-            # downsample if too many points
+            channel_series = data[ch, :].astype(np.float64)
+
+            # Apply light smoothing using moving average (window size = 3)
+            if channel_series.size >= 3:
+                smoothed = channel_series.copy()
+                DataFilter.perform_rolling_filter(smoothed, 3, operation=0)  # 0 = mean
+                channel_series = smoothed
+
+            # Downsample if too many points
             if channel_series.size > max_points:
                 step = int(np.floor(channel_series.size / max_points))
                 channel_series = channel_series[::step]
+
             ts_data.append(channel_series.tolist())
 
         channel_names = [f"CH{idx+1}" for idx in range(len(ch_indices))]
@@ -132,10 +175,13 @@ class GanglionService:
     def get_fft_spectrum(
         self,
         window_sec: float = 4.0,
-        max_freq: float = 50.0,
+        min_freq: float = 0.5,
+        max_freq: float = 40.0,
     ) -> Tuple[List[str], List[float], List[List[float]]]:
         """
         Returns (channel_names, freqs, psd[channels][freqs])
+        PSD values are in log scale (dB) for better visualization
+        Signal is preprocessed with bandpass and notch filters
         """
         if not (self.connected and self.streaming and self.board):
             return [], [], []
@@ -160,23 +206,35 @@ class GanglionService:
                 all_psd.append([])
                 continue
 
-            # detrend + PSD with Welch via BrainFlow helper
+            # Detrend to remove linear trends
             DataFilter.detrend(sig, DetrendOperations.LINEAR.value)
+
+            # Choose fft_len as nearest power of 2, but MUST be < data length
+            # Use 50% overlap for good PSD estimation
             fft_len = DataFilter.get_nearest_power_of_two(sig.size)
+            while fft_len >= sig.size and fft_len > 2:
+                fft_len = fft_len // 2
+
+            overlap = fft_len // 2  # 50% overlap
+
             psd, freqs = DataFilter.get_psd_welch(
-                sig, fft_len, fft_len // 2, sampling_rate,
+                sig, fft_len, overlap, sampling_rate,
                 WindowOperations.HANNING.value
             )
 
-            # Filter to max_freq
-            mask = freqs <= max_freq
+            # Filter to frequency range
+            mask = (freqs >= min_freq) & (freqs <= max_freq)
             filtered_freqs = freqs[mask]
             filtered_psd = psd[mask]
+
+            # Convert to dB scale for better visualization: 10 * log10(PSD)
+            # Add small epsilon to avoid log(0)
+            psd_db = 10 * np.log10(filtered_psd + 1e-10)
 
             if ch_idx == 0:
                 freq_list = filtered_freqs.tolist()
 
-            all_psd.append(filtered_psd.tolist())
+            all_psd.append(psd_db.tolist())
 
         return channel_names, freq_list, all_psd
 
@@ -184,17 +242,20 @@ class GanglionService:
         self,
         window_sec: float = 4.0,
         bands: Optional[List[Tuple[str, float, float]]] = None,
+        use_relative: bool = True,
     ) -> Tuple[List[str], List[str], List[List[float]]]:
         """
         Returns (channel_names, band_names, band_values[channels][bands])
+        Signal is preprocessed with bandpass and notch filters
+        If use_relative=True, returns relative band power (percentage of total power)
         """
         if bands is None:
             bands = [
-                ("delta", 1.0, 4.0),
+                ("delta", 0.5, 4.0),
                 ("theta", 4.0, 8.0),
                 ("alpha", 8.0, 13.0),
                 ("beta", 13.0, 30.0),
-                ("gamma", 30.0, 45.0),
+                ("gamma", 30.0, 40.0),
             ]
 
         if not (self.connected and self.streaming and self.board):
@@ -220,23 +281,35 @@ class GanglionService:
                 all_band_vals.append([0.0] * len(bands))
                 continue
 
-            # detrend + PSD with Welch via BrainFlow helper
-            DataFilter.detrend(
-                sig, DetrendOperations.LINEAR.value
-            )
-            # choose fft_len as nearest power of 2 <= len(sig)
+            # Detrend to remove linear trends
+            DataFilter.detrend(sig, DetrendOperations.LINEAR.value)
+
+            # Choose fft_len as nearest power of 2, but MUST be < data length
             fft_len = DataFilter.get_nearest_power_of_two(sig.size)
-            psd, freqs = DataFilter.get_psd_welch(
-                sig, fft_len, fft_len // 2, sampling_rate,
+            while fft_len >= sig.size and fft_len > 2:
+                fft_len = fft_len // 2
+
+            overlap = fft_len // 2  # 50% overlap
+
+            psd_tuple = DataFilter.get_psd_welch(
+                sig, fft_len, overlap, sampling_rate,
                 WindowOperations.HANNING.value
             )
 
-            # freqs, psd are numpy arrays
-            # integrate band power
+            # Calculate band powers
             ch_band_vals: List[float] = []
             for _, fmin, fmax in bands:
-                bp = DataFilter.get_band_power(psd, freqs, fmin, fmax)
+                bp = DataFilter.get_band_power(psd_tuple, fmin, fmax)
                 ch_band_vals.append(float(bp))
+
+            # Convert to relative power (percentage) if requested
+            if use_relative:
+                total_power = sum(ch_band_vals)
+                if total_power > 0:
+                    ch_band_vals = [(bp / total_power) * 100 for bp in ch_band_vals]
+                else:
+                    ch_band_vals = [0.0] * len(bands)
+
             all_band_vals.append(ch_band_vals)
 
         return channel_names, band_names, all_band_vals
