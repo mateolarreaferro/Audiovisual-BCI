@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BioMus - Neural Audio Interface</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Eleven Labs inspired palette */
+      --bg-primary: #FFFFFF;
+      --bg-secondary: #F9FAFC;
+      --bg-tertiary: #F5F3F1;
+      --bg-elevated: #FFFFFF;
+
+      /* Accent colors */
+      --accent-blue: #2AA3FE;
+      --accent-green: #10B978;
+      --accent-purple: #B743C6;
+      --accent-orange: #F58633;
+
+      /* Neutrals */
+      --neutral-900: #090F15;
+      --neutral-800: #1C1C1C;
+      --neutral-700: #2D2D2D;
+      --neutral-600: #6B7280;
+      --neutral-500: #9CA3AF;
+      --neutral-400: #C8D5F4;
+      --neutral-300: #E5E5E5;
+      --neutral-200: #F3F4F6;
+      --neutral-100: #F9FAFB;
+
+      /* Semantic colors */
+      --text-primary: #090F15;
+      --text-secondary: #6B7280;
+      --text-tertiary: #9CA3AF;
+      --success: #10B978;
+      --error: #EF4444;
+      --warning: #F58633;
+
+      /* Borders & shadows */
+      --border-light: #E5E5E5;
+      --border-medium: #C8D5F4;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 10px 24px rgba(0, 0, 0, 0.1);
+      --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.12);
+
+      /* Radius */
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --radius-full: 9999px;
+
+      /* Spacing */
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+      --space-2xl: 48px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 320px;
+      background: var(--bg-primary);
+      border-right: 1px solid var(--border-light);
+      padding: var(--space-xl) var(--space-lg);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xl);
+      overflow-y: auto;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+      padding-bottom: var(--space-lg);
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .brand-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 20px;
+      color: white;
+      box-shadow: var(--shadow-md);
+    }
+
+    .brand-text h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+    }
+
+    .brand-text .tagline {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    .brand-credit {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      font-weight: 400;
+      margin-top: var(--space-xs);
+    }
+
+    .section {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-tertiary);
+    }
+
+    .card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-md);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: var(--space-md);
+    }
+
+    .step-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-green));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .card-title-group {
+      flex: 1;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .card-subtitle {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    .status-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: var(--radius-full);
+      background: var(--neutral-300);
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .status-indicator.connected {
+      background: var(--success);
+      box-shadow: 0 0 0 4px rgba(16, 185, 120, 0.15);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .info-box {
+      background: linear-gradient(135deg, rgba(42, 163, 254, 0.08), rgba(183, 67, 198, 0.08));
+      border: 1px solid rgba(42, 163, 254, 0.2);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-md);
+    }
+
+    .info-box strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .field-group {
+      margin-bottom: var(--space-md);
+    }
+
+    .field-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-sm);
+      display: block;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-light);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px rgba(42, 163, 254, 0.1);
+    }
+
+    input::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    .input-row {
+      display: flex;
+      gap: var(--space-sm);
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: var(--radius-full);
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      white-space: nowrap;
+      border: none;
+      outline: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-green));
+      color: white;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-light);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-secondary);
+      border-color: var(--border-medium);
+    }
+
+    .btn-danger {
+      background: var(--bg-primary);
+      color: var(--error);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.05);
+      border-color: var(--error);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: var(--space-sm);
+    }
+
+    .btn-sm {
+      padding: 6px 14px;
+      font-size: 13px;
+    }
+
+    .toggle-group {
+      display: flex;
+      gap: var(--space-sm);
+      flex-wrap: wrap;
+    }
+
+    .toggle-btn {
+      padding: 8px 16px;
+      border-radius: var(--radius-full);
+      font-size: 13px;
+      font-weight: 500;
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-light);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .toggle-btn:hover {
+      background: var(--neutral-200);
+    }
+
+    .toggle-btn.active {
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      color: white;
+      border-color: transparent;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--neutral-200);
+      color: var(--text-secondary);
+    }
+
+    .status-pill.active {
+      background: linear-gradient(135deg, rgba(42, 163, 254, 0.15), rgba(16, 185, 120, 0.15));
+      color: var(--accent-blue);
+      border: 1px solid rgba(42, 163, 254, 0.3);
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border-light);
+      margin: var(--space-md) 0;
+    }
+
+    .helper-text {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      line-height: 1.5;
+      margin-top: var(--space-sm);
+    }
+
+    /* Main Content */
+    .main {
+      flex: 1;
+      padding: var(--space-xl);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+      overflow-y: auto;
+    }
+
+    .main-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--space-lg);
+      flex-wrap: wrap;
+    }
+
+    .main-title-group h2 {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+
+    .main-subtitle {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      max-width: 600px;
+    }
+
+    .mode-tabs {
+      display: inline-flex;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-full);
+      padding: 4px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .mode-tab {
+      padding: 8px 20px;
+      border-radius: var(--radius-full);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .mode-tab:hover {
+      color: var(--text-primary);
+    }
+
+    .mode-tab.active {
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      color: white;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 2.5fr) minmax(280px, 1fr);
+      gap: var(--space-lg);
+    }
+
+    .chart-card {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-xl);
+      padding: var(--space-xl);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: var(--space-lg);
+    }
+
+    .chart-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .chart-description {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .chart-meta {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      text-align: right;
+    }
+
+    .chart-container {
+      height: 400px;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-lg);
+      padding: var(--space-md);
+      position: relative;
+    }
+
+    #timeseriesChart,
+    #bandsChart {
+      width: 100%;
+      height: 100%;
+    }
+
+    .chart-footer {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-top: var(--space-lg);
+      padding-top: var(--space-lg);
+      border-top: 1px solid var(--border-light);
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 500;
+      background: linear-gradient(135deg, rgba(42, 163, 254, 0.1), rgba(183, 67, 198, 0.1));
+      color: var(--accent-blue);
+      border: 1px solid rgba(42, 163, 254, 0.2);
+    }
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: var(--radius-full);
+      background: currentColor;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .alert {
+      padding: var(--space-md);
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      line-height: 1.6;
+      margin-top: var(--space-md);
+      display: none;
+    }
+
+    .alert-error {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--error);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .alert-success {
+      background: rgba(16, 185, 120, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 120, 0.3);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border-light);
+        padding: var(--space-lg);
+      }
+
+      .main {
+        padding: var(--space-lg);
+      }
+
+      .main-title-group h2 {
+        font-size: 24px;
+      }
+
+      .chart-container {
+        height: 320px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-header">
+        <div class="brand-logo">B</div>
+        <div class="brand-text">
+          <h1>BioMus</h1>
+          <div class="tagline">Neural Audio Interface</div>
+        </div>
+      </div>
+      <div class="brand-credit">by Everett Leigh</div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Quick Start</div>
+
+      <!-- Global Messages -->
+      <div id="global-error" class="alert alert-error"></div>
+      <div id="global-success" class="alert alert-success"></div>
+
+      <!-- Step 1: Connect -->
+      <div class="card">
+        <div class="card-header">
+          <div class="step-badge">1</div>
+          <div class="card-title-group">
+            <div class="card-title">Connect Device</div>
+            <div class="card-subtitle" id="status-subtext">OpenBCI Ganglion</div>
+          </div>
+          <div class="status-indicator" id="status-dot"></div>
+        </div>
+
+        <div class="info-box">
+          <strong>Bluetooth:</strong> Leave empty and click Connect<br>
+          <strong>BLED112:</strong> Enter serial port (e.g., /dev/tty.usbmodem14101)
+        </div>
+
+        <div class="field-group">
+          <input
+            id="serial-input"
+            type="text"
+            placeholder="Serial port (optional for Bluetooth)"
+          />
+        </div>
+
+        <div class="btn-group">
+          <button id="btn-connect" class="btn btn-primary" style="flex: 1;">
+            Connect
+          </button>
+          <button id="btn-disconnect" class="btn btn-danger">
+            Disconnect
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Stream -->
+      <div class="card">
+        <div class="card-header">
+          <div class="step-badge">2</div>
+          <div class="card-title-group">
+            <div class="card-title">Start Streaming</div>
+            <div class="card-subtitle">
+              <span id="stream-pill" class="status-pill">Ready</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button id="btn-start" class="btn btn-primary" style="flex: 1;">
+            Start Stream
+          </button>
+          <button id="btn-stop" class="btn btn-secondary">
+            Stop
+          </button>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="field-group" style="margin-bottom: 0;">
+          <label class="field-label">Test Signal</label>
+          <div class="btn-group">
+            <button id="btn-test-on" class="btn btn-secondary btn-sm" style="flex: 1;">Enable</button>
+            <button id="btn-test-off" class="btn btn-secondary btn-sm" style="flex: 1;">Disable</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">OSC Output</div>
+      <div class="card">
+        <div class="field-group">
+          <label class="field-label">Target Address</label>
+          <div class="input-row">
+            <input id="osc-ip" type="text" value="127.0.0.1" placeholder="IP Address" />
+            <input id="osc-port" type="number" value="9000" placeholder="Port" style="max-width: 100px;" />
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Data Format</label>
+          <div class="toggle-group">
+            <button id="osc-raw-toggle" class="toggle-btn active">Raw</button>
+            <button id="osc-bands-toggle" class="toggle-btn">Bands</button>
+          </div>
+        </div>
+
+        <button id="osc-enable" class="btn btn-secondary" style="width: 100%;">
+          Enable OSC
+        </button>
+
+        <div class="helper-text">
+          /eeg/raw: Flattened time series samples<br>
+          /eeg/bands: Channel frequency band powers
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="main-header">
+      <div class="main-title-group">
+        <h2>Signal Monitor</h2>
+        <p class="main-subtitle">
+          Real-time EEG visualization from OpenBCI Ganglion with time series and frequency band analysis.
+        </p>
+      </div>
+      <div class="mode-tabs">
+        <button id="tab-timeseries" class="mode-tab active">Time Series</button>
+        <button id="tab-bands" class="mode-tab">Frequency Bands</button>
+      </div>
+    </header>
+
+    <section class="main-grid">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title" id="visual-title">Time Series</div>
+            <div class="chart-description" id="visual-subtitle">
+              4-channel windowed EEG traces with temporal dynamics
+            </div>
+          </div>
+          <div class="chart-meta" id="visual-meta">
+            Mode: timeseries · Window: 4s
+          </div>
+        </div>
+
+        <div class="chart-container">
+          <canvas id="timeseriesChart"></canvas>
+          <canvas id="bandsChart" style="display:none;"></canvas>
+        </div>
+
+        <div class="chart-footer">
+          <div class="badge">
+            <span class="badge-dot"></span>
+            <span id="chip-mode">Streaming: time series</span>
+          </div>
+          <div class="badge">
+            OSC: <span id="chip-osc">disabled</span>
+          </div>
+        </div>
+
+        <div id="error-msg" class="alert alert-error"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom: var(--space-sm);">Stream Configuration</div>
+        <div class="card-subtitle" style="margin-bottom: var(--space-lg);">
+          Adjust analysis parameters for real-time processing
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Window Length (seconds)</label>
+          <input id="window-sec" type="number" value="4" min="1" max="10" />
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Update Interval (ms)</label>
+          <input id="interval-ms" type="number" value="100" min="50" max="1000" />
+        </div>
+
+        <div class="divider"></div>
+
+        <div>
+          <div class="field-label">Channel Mapping</div>
+          <div class="helper-text">
+            Channels are labeled CH1-CH4 in acquisition order. For detailed electrode mapping, refer to OpenBCI Ganglion documentation.
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="helper-text">
+          Powered by BrainFlow for device access and Welch PSD for band-power estimation on sliding windows.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    let ws = null;
+    let currentMode = "timeseries";
+    let connected = false;
+    let streaming = false;
+    let oscEnabled = false;
+    let oscSendRaw = true;
+    let oscSendBands = false;
+
+    const statusDot = document.getElementById("status-dot");
+    const statusSub = document.getElementById("status-subtext");
+    const streamPill = document.getElementById("stream-pill");
+    const chipMode = document.getElementById("chip-mode");
+    const chipOsc = document.getElementById("chip-osc");
+    const globalError = document.getElementById("global-error");
+    const globalSuccess = document.getElementById("global-success");
+    const errorMsg = document.getElementById("error-msg");
+    const visualTitle = document.getElementById("visual-title");
+    const visualSubtitle = document.getElementById("visual-subtitle");
+    const visualMeta = document.getElementById("visual-meta");
+
+    function showError(message) {
+      globalError.textContent = message;
+      globalError.style.display = "block";
+      globalSuccess.style.display = "none";
+      setTimeout(() => {
+        globalError.style.display = "none";
+      }, 8000);
+    }
+
+    function showSuccess(message) {
+      globalSuccess.textContent = message;
+      globalSuccess.style.display = "block";
+      globalError.style.display = "none";
+      setTimeout(() => {
+        globalSuccess.style.display = "none";
+      }, 5000);
+    }
+
+    function hideMessages() {
+      globalError.style.display = "none";
+      globalSuccess.style.display = "none";
+    }
+
+    function setStatus() {
+      if (connected) {
+        statusDot.classList.add("connected");
+        statusSub.textContent = streaming ? "Streaming active" : "Connected - ready to stream";
+      } else {
+        statusDot.classList.remove("connected");
+        statusSub.textContent = "OpenBCI Ganglion";
+      }
+      if (streaming) {
+        streamPill.textContent = "Streaming";
+        streamPill.classList.add("active");
+      } else {
+        streamPill.textContent = connected ? "Ready" : "Idle";
+        streamPill.classList.remove("active");
+      }
+      chipMode.textContent = streaming
+        ? `Streaming: ${currentMode === "timeseries" ? "time series" : "frequency bands"}`
+        : "Streaming: stopped";
+    }
+
+    function setOscChip() {
+      chipOsc.textContent = oscEnabled
+        ? `enabled (${[
+            oscSendRaw ? "raw" : null,
+            oscSendBands ? "bands" : null,
+          ].filter(Boolean).join(" + ")})`
+        : "disabled";
+    }
+
+    async function postJSON(url, data) {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data || {}),
+      });
+      return res.json();
+    }
+
+    async function refreshStatus() {
+      const res = await fetch("/api/status");
+      const json = await res.json();
+      connected = json.connected;
+      streaming = json.streaming;
+      setStatus();
+    }
+
+    // Connect button
+    document.getElementById("btn-connect").onclick = async () => {
+      const input = document.getElementById("serial-input").value.trim();
+      const btn = document.getElementById("btn-connect");
+
+      hideMessages();
+
+      let payload, deviceType;
+      if (!input) {
+        payload = { serial_port: "", mac_address: "" };
+        deviceType = "Native Bluetooth";
+      } else if (input.includes(":")) {
+        payload = { serial_port: "", mac_address: input };
+        deviceType = "Bluetooth (MAC)";
+      } else {
+        payload = { serial_port: input, mac_address: "" };
+        deviceType = "Serial (BLED112)";
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Connecting...";
+
+      try {
+        const json = await postJSON("/api/connect", payload);
+
+        if (json.status === "ok") {
+          connected = true;
+          showSuccess(`Connected via ${deviceType}! Now click 'Start Stream' to begin.`);
+        } else {
+          connected = false;
+          let troubleshoot = input.includes("/dev/")
+            ? "Check that Ganglion is powered on and USB dongle is connected."
+            : "Turn on Ganglion board (blue LED blinking) and ensure Bluetooth is enabled.";
+          showError(`Connection failed: ${json.message || "Unknown error"}\n\n${troubleshoot}`);
+        }
+      } catch (error) {
+        showError(`Failed to connect: ${error.message}`);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Connect";
+        setStatus();
+      }
+    };
+
+    document.getElementById("btn-disconnect").onclick = async () => {
+      await postJSON("/api/disconnect", {});
+      connected = false;
+      streaming = false;
+      closeWS();
+      showSuccess("Disconnected successfully");
+      setStatus();
+    };
+
+    document.getElementById("btn-start").onclick = async () => {
+      if (!connected) {
+        showError("Please connect to the device first");
+        return;
+      }
+
+      hideMessages();
+      const json = await postJSON("/api/start", {});
+      if (json.status === "ok") {
+        streaming = true;
+        openWS();
+        showSuccess("Streaming started successfully");
+      } else {
+        showError(`Failed to start stream: ${json.message || "Unknown error"}`);
+      }
+      setStatus();
+    };
+
+    document.getElementById("btn-stop").onclick = async () => {
+      await postJSON("/api/stop", {});
+      streaming = false;
+      closeWS();
+      showSuccess("Stream stopped");
+      setStatus();
+    };
+
+    document.getElementById("btn-test-on").onclick = async () => {
+      await postJSON("/api/test_signal", { on: true });
+    };
+
+    document.getElementById("btn-test-off").onclick = async () => {
+      await postJSON("/api/test_signal", { on: false });
+    };
+
+    // OSC toggles
+    const oscRawToggle = document.getElementById("osc-raw-toggle");
+    const oscBandsToggle = document.getElementById("osc-bands-toggle");
+    const oscEnableBtn = document.getElementById("osc-enable");
+
+    oscRawToggle.onclick = () => {
+      oscSendRaw = !oscSendRaw;
+      oscRawToggle.classList.toggle("active", oscSendRaw);
+      pushOscConfig();
+    };
+
+    oscBandsToggle.onclick = () => {
+      oscSendBands = !oscSendBands;
+      oscBandsToggle.classList.toggle("active", oscSendBands);
+      pushOscConfig();
+    };
+
+    oscEnableBtn.onclick = () => {
+      oscEnabled = !oscEnabled;
+      oscEnableBtn.textContent = oscEnabled ? "Disable OSC" : "Enable OSC";
+      pushOscConfig();
+    };
+
+    async function pushOscConfig() {
+      const ip = document.getElementById("osc-ip").value.trim() || "127.0.0.1";
+      const port = parseInt(document.getElementById("osc-port").value.trim() || "9000", 10);
+      await postJSON("/api/osc_config", {
+        ip,
+        port,
+        enabled: oscEnabled,
+        send_raw: oscSendRaw,
+        send_bands: oscSendBands,
+      });
+      setOscChip();
+    }
+
+    // Mode tabs
+    const tabTS = document.getElementById("tab-timeseries");
+    const tabBands = document.getElementById("tab-bands");
+    tabTS.onclick = () => switchMode("timeseries");
+    tabBands.onclick = () => switchMode("bands");
+
+    function switchMode(mode) {
+      if (mode === currentMode) return;
+      currentMode = mode;
+      tabTS.classList.toggle("active", mode === "timeseries");
+      tabBands.classList.toggle("active", mode === "bands");
+
+      if (mode === "timeseries") {
+        visualTitle.textContent = "Time Series";
+        visualSubtitle.textContent = "4-channel windowed EEG traces with temporal dynamics";
+        document.getElementById("timeseriesChart").style.display = "block";
+        document.getElementById("bandsChart").style.display = "none";
+      } else {
+        visualTitle.textContent = "Frequency Bands";
+        visualSubtitle.textContent = "Per-channel power distribution across delta, theta, alpha, beta, and gamma bands";
+        document.getElementById("timeseriesChart").style.display = "none";
+        document.getElementById("bandsChart").style.display = "block";
+      }
+
+      const windowSec = parseFloat(document.getElementById("window-sec").value || "4");
+      visualMeta.textContent = `Mode: ${mode} · Window: ${windowSec.toFixed(1)}s`;
+
+      if (ws) {
+        const intervalMs = parseInt(
+          document.getElementById("interval-ms").value || "100",
+          10
+        );
+        ws.send(
+          JSON.stringify({
+            mode,
+            window_sec: windowSec,
+            interval_ms: intervalMs,
+          })
+        );
+      }
+      setStatus();
+    }
+
+    // Charts with Eleven Labs inspired colors
+    const tsCtx = document.getElementById("timeseriesChart").getContext("2d");
+    const bandsCtx = document.getElementById("bandsChart").getContext("2d");
+
+    const chartColors = [
+      "#2AA3FE", // Blue
+      "#10B978", // Green
+      "#B743C6", // Purple
+      "#F58633", // Orange
+    ];
+
+    let tsChart = new Chart(tsCtx, {
+      type: "line",
+      data: {
+        labels: [],
+        datasets: [],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+          duration: 100,
+          easing: 'linear'
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: "#9CA3AF",
+              font: { family: 'Inter' }
+            },
+            grid: { color: "rgba(229, 229, 229, 0.5)" },
+          },
+          y: {
+            ticks: {
+              color: "#9CA3AF",
+              font: { family: 'Inter' }
+            },
+            grid: { color: "rgba(229, 229, 229, 0.5)" },
+          },
+        },
+        interaction: {
+          mode: 'nearest',
+          intersect: false
+        },
+        plugins: {
+          legend: {
+            labels: {
+              color: "#6B7280",
+              usePointStyle: true,
+              font: { family: 'Inter', weight: '500' }
+            },
+          },
+          decimation: {
+            enabled: true,
+            algorithm: 'lttb',
+            samples: 500
+          }
+        },
+        elements: {
+          line: {
+            tension: 0.4,
+            borderWidth: 2.5,
+          },
+          point: { radius: 0 },
+        },
+      },
+    });
+
+    let bandsChart = new Chart(bandsCtx, {
+      type: "bar",
+      data: {
+        labels: [],
+        datasets: [],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+          duration: 200,
+          easing: 'easeInOutQuad'
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: "#9CA3AF",
+              font: { family: 'Inter', size: 11 }
+            },
+            grid: { color: "rgba(229, 229, 229, 0.5)" },
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              color: "#9CA3AF",
+              font: { family: 'Inter' }
+            },
+            grid: { color: "rgba(229, 229, 229, 0.5)" },
+            title: {
+              display: true,
+              text: 'Power',
+              color: "#6B7280",
+              font: { family: 'Inter', weight: '500' }
+            }
+          },
+        },
+        plugins: {
+          legend: {
+            labels: {
+              color: "#6B7280",
+              usePointStyle: true,
+              font: { family: 'Inter', weight: '500' }
+            },
+          },
+        },
+      },
+    });
+
+    function updateTimeSeriesChart(channels, data) {
+      if (!data || data.length === 0) return;
+      const n = data[0].length;
+      const labels = Array.from({ length: n }, (_, i) => i.toString());
+
+      tsChart.data.labels = labels;
+
+      if (tsChart.data.datasets.length !== channels.length) {
+        tsChart.data.datasets = channels.map((chName, idx) => ({
+          label: chName,
+          data: data[idx],
+          borderColor: chartColors[idx % chartColors.length],
+          backgroundColor: "transparent",
+        }));
+      } else {
+        channels.forEach((_, idx) => {
+          tsChart.data.datasets[idx].data = data[idx];
+        });
+      }
+      tsChart.update("none");
+    }
+
+    function updateBandsChart(channels, bandNames, values) {
+      if (!values || values.length === 0) return;
+
+      bandsChart.data.labels = bandNames;
+
+      if (bandsChart.data.datasets.length !== channels.length) {
+        bandsChart.data.datasets = channels.map((chName, idx) => ({
+          label: chName,
+          data: values[idx],
+          backgroundColor: chartColors[idx % chartColors.length] + "B3", // 70% opacity
+        }));
+      } else {
+        channels.forEach((_, idx) => {
+          bandsChart.data.datasets[idx].data = values[idx];
+        });
+      }
+      bandsChart.update("none");
+    }
+
+    // WebSocket
+    function openWS() {
+      if (ws) return;
+      const proto = window.location.protocol === "https:" ? "wss" : "ws";
+      const url = `${proto}://${window.location.host}/ws/stream`;
+      ws = new WebSocket(url);
+
+      ws.onopen = () => {
+        const windowSec = parseFloat(document.getElementById("window-sec").value || "4");
+        const intervalMs = parseInt(
+          document.getElementById("interval-ms").value || "100",
+          10
+        );
+        ws.send(
+          JSON.stringify({
+            mode: currentMode,
+            window_sec: windowSec,
+            interval_ms: intervalMs,
+          })
+        );
+        errorMsg.style.display = "none";
+      };
+
+      ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.type === "timeseries") {
+          updateTimeSeriesChart(msg.channels, msg.data);
+        } else if (msg.type === "bands") {
+          updateBandsChart(msg.channels, msg.bands, msg.values);
+        } else if (msg.type === "error") {
+          errorMsg.textContent = msg.message || "Stream error.";
+          errorMsg.style.display = "block";
+        }
+      };
+
+      ws.onclose = () => {
+        ws = null;
+      };
+
+      ws.onerror = () => {
+        errorMsg.textContent = "WebSocket error.";
+        errorMsg.style.display = "block";
+      };
+    }
+
+    function closeWS() {
+      if (ws) {
+        ws.close();
+        ws = null;
+      }
+    }
+
+    // Initial status check
+    refreshStatus();
+    setOscChip();
+  </script>
+</body>
+</html>
