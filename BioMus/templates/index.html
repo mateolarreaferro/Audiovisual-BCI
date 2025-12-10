@@ -699,35 +699,6 @@
       </div>
     </div>
 
-    <div class="section">
-      <div class="section-label">OSC Output</div>
-      <div class="card">
-        <div class="field-group">
-          <label class="field-label">Target Address</label>
-          <div class="input-row">
-            <input id="osc-ip" type="text" value="127.0.0.1" placeholder="IP Address" />
-            <input id="osc-port" type="number" value="9000" placeholder="Port" style="max-width: 100px;" />
-          </div>
-        </div>
-
-        <div class="field-group">
-          <label class="field-label">Data Format</label>
-          <div class="toggle-group">
-            <button id="osc-raw-toggle" class="toggle-btn active">Raw</button>
-            <button id="osc-bands-toggle" class="toggle-btn">Bands</button>
-          </div>
-        </div>
-
-        <button id="osc-enable" class="btn btn-secondary" style="width: 100%;">
-          Enable OSC
-        </button>
-
-        <div class="helper-text">
-          /eeg/raw: Flattened time series samples<br>
-          /eeg/bands: Channel frequency band powers
-        </div>
-      </div>
-    </div>
   </aside>
 
   <main class="main">
@@ -778,41 +749,46 @@
         <div id="error-msg" class="alert alert-error"></div>
       </div>
 
-      <div class="card">
-        <div class="card-title" style="margin-bottom: var(--space-sm);">Stream Configuration</div>
-        <div class="card-subtitle" style="margin-bottom: var(--space-lg);">
-          Adjust analysis parameters for real-time processing
-        </div>
-
-        <div class="field-group">
-          <label class="field-label">Window Length (seconds)</label>
-          <input id="window-sec" type="number" value="4" min="1" max="10" />
-        </div>
-
-        <div class="field-group">
-          <label class="field-label">Update Interval (ms)</label>
-          <input id="interval-ms" type="number" value="100" min="50" max="1000" />
-        </div>
-
-        <div class="divider"></div>
-
-        <div>
-          <div class="field-label">Channel Mapping</div>
-          <div class="helper-text">
-            Channels are labeled CH1-CH4 in acquisition order. For detailed electrode mapping, refer to OpenBCI Ganglion documentation.
+      <div class="section">
+        <div class="section-label">OSC Output</div>
+        <div class="card">
+          <div class="field-group">
+            <label class="field-label">Target Address</label>
+            <div class="input-row">
+              <input id="osc-ip" type="text" value="127.0.0.1" placeholder="IP Address" />
+              <input id="osc-port" type="number" value="9000" placeholder="Port" style="max-width: 100px;" />
+            </div>
           </div>
-        </div>
 
-        <div class="divider"></div>
+          <div class="field-group">
+            <label class="field-label">Data Format</label>
+            <div class="toggle-group">
+              <button id="osc-raw-toggle" class="toggle-btn active">Raw</button>
+              <button id="osc-bands-toggle" class="toggle-btn">Bands</button>
+            </div>
+          </div>
 
-        <div class="helper-text">
-          Powered by BrainFlow for device access and Welch PSD for band-power estimation on sliding windows.
+          <div class="divider"></div>
+
+          <div class="helper-text">
+            Stream EEG data via OSC to external applications (e.g., Max/MSP, TouchDesigner, Pure Data)
+          </div>
+
+          <div style="margin-top: var(--space-md);">
+            <button id="osc-enable-btn" class="btn btn-secondary">
+              Enable OSC
+            </button>
+          </div>
         </div>
       </div>
     </section>
   </main>
 
   <script>
+    // Stream configuration constants - optimized for real-time EEG visualization
+    const WINDOW_SEC = 4.0;  // 4 seconds provides good balance of temporal/frequency resolution
+    const UPDATE_INTERVAL_MS = 50;  // 50ms = 20 updates/second for smooth visualization
+
     let ws = null;
     let currentMode = "timeseries";
     let connected = false;
@@ -992,7 +968,7 @@
     // OSC toggles
     const oscRawToggle = document.getElementById("osc-raw-toggle");
     const oscBandsToggle = document.getElementById("osc-bands-toggle");
-    const oscEnableBtn = document.getElementById("osc-enable");
+    const oscEnableBtn = document.getElementById("osc-enable-btn");
 
     oscRawToggle.onclick = () => {
       oscSendRaw = !oscSendRaw;
@@ -1060,19 +1036,14 @@
         document.getElementById("bandsChart").style.display = "block";
       }
 
-      const windowSec = parseFloat(document.getElementById("window-sec").value || "4");
-      visualMeta.textContent = `Mode: ${mode} · Window: ${windowSec.toFixed(1)}s`;
+      visualMeta.textContent = `Mode: ${mode} · Window: ${WINDOW_SEC.toFixed(1)}s`;
 
       if (ws) {
-        const intervalMs = parseInt(
-          document.getElementById("interval-ms").value || "100",
-          10
-        );
         ws.send(
           JSON.stringify({
             mode,
-            window_sec: windowSec,
-            interval_ms: intervalMs,
+            window_sec: WINDOW_SEC,
+            interval_ms: UPDATE_INTERVAL_MS,
           })
         );
       }
@@ -1330,16 +1301,11 @@
       ws = new WebSocket(url);
 
       ws.onopen = () => {
-        const windowSec = parseFloat(document.getElementById("window-sec").value || "4");
-        const intervalMs = parseInt(
-          document.getElementById("interval-ms").value || "100",
-          10
-        );
         ws.send(
           JSON.stringify({
             mode: currentMode,
-            window_sec: windowSec,
-            interval_ms: intervalMs,
+            window_sec: WINDOW_SEC,
+            interval_ms: UPDATE_INTERVAL_MS,
           })
         );
         errorMsg.style.display = "none";
