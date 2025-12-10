@@ -10,50 +10,50 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      /* Eleven Labs inspired palette */
-      --bg-primary: #FFFFFF;
-      --bg-secondary: #F9FAFC;
-      --bg-tertiary: #F5F3F1;
-      --bg-elevated: #FFFFFF;
+      /* Minimal Black & White Theme (Eleven Labs inspired) */
+      --bg-primary: #000000;
+      --bg-secondary: #0A0A0A;
+      --bg-tertiary: #141414;
+      --bg-elevated: #1A1A1A;
 
-      /* Accent colors */
+      /* Accent colors - for brain wave visualizations only */
       --accent-blue: #2AA3FE;
       --accent-green: #10B978;
       --accent-purple: #B743C6;
       --accent-orange: #F58633;
 
-      /* Neutrals */
-      --neutral-900: #090F15;
-      --neutral-800: #1C1C1C;
-      --neutral-700: #2D2D2D;
-      --neutral-600: #6B7280;
-      --neutral-500: #9CA3AF;
-      --neutral-400: #C8D5F4;
-      --neutral-300: #E5E5E5;
-      --neutral-200: #F3F4F6;
-      --neutral-100: #F9FAFB;
+      /* Neutrals - grayscale only */
+      --neutral-900: #FFFFFF;
+      --neutral-800: #E5E5E5;
+      --neutral-700: #CCCCCC;
+      --neutral-600: #999999;
+      --neutral-500: #666666;
+      --neutral-400: #4D4D4D;
+      --neutral-300: #333333;
+      --neutral-200: #1F1F1F;
+      --neutral-100: #141414;
 
       /* Semantic colors */
-      --text-primary: #090F15;
-      --text-secondary: #6B7280;
-      --text-tertiary: #9CA3AF;
-      --success: #10B978;
-      --error: #EF4444;
-      --warning: #F58633;
+      --text-primary: #FFFFFF;
+      --text-secondary: #999999;
+      --text-tertiary: #666666;
+      --success: #FFFFFF;
+      --error: #FFFFFF;
+      --warning: #FFFFFF;
 
       /* Borders & shadows */
-      --border-light: #E5E5E5;
-      --border-medium: #C8D5F4;
-      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
-      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-      --shadow-lg: 0 10px 24px rgba(0, 0, 0, 0.1);
-      --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.12);
+      --border-light: #333333;
+      --border-medium: #4D4D4D;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 10px 24px rgba(0, 0, 0, 0.5);
+      --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.6);
 
       /* Radius */
-      --radius-sm: 6px;
-      --radius-md: 10px;
-      --radius-lg: 16px;
-      --radius-xl: 24px;
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
       --radius-full: 9999px;
 
       /* Spacing */
@@ -112,14 +112,14 @@
       width: 48px;
       height: 48px;
       border-radius: var(--radius-md);
-      background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-light);
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 700;
       font-size: 20px;
-      color: white;
-      box-shadow: var(--shadow-md);
+      color: var(--text-primary);
     }
 
     .brand-text h1 {
@@ -181,13 +181,14 @@
       width: 32px;
       height: 32px;
       border-radius: var(--radius-md);
-      background: linear-gradient(135deg, var(--accent-blue), var(--accent-green));
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-light);
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 700;
       font-size: 14px;
-      color: white;
+      color: var(--text-primary);
       flex-shrink: 0;
     }
 
@@ -218,8 +219,8 @@
     }
 
     .status-indicator.connected {
-      background: var(--success);
-      box-shadow: 0 0 0 4px rgba(16, 185, 120, 0.15);
+      background: var(--text-primary);
+      box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.15);
       animation: pulse 2s ease-in-out infinite;
     }
 
@@ -229,8 +230,8 @@
     }
 
     .info-box {
-      background: linear-gradient(135deg, rgba(42, 163, 254, 0.08), rgba(183, 67, 198, 0.08));
-      border: 1px solid rgba(42, 163, 254, 0.2);
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
       border-radius: var(--radius-md);
       padding: 12px;
       font-size: 12px;
@@ -302,14 +303,15 @@
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, var(--accent-blue), var(--accent-green));
-      color: white;
-      box-shadow: var(--shadow-sm);
+      background: var(--text-primary);
+      color: var(--bg-primary);
+      border: 1px solid var(--text-primary);
     }
 
     .btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-md);
+      background: var(--neutral-800);
+      border-color: var(--neutral-800);
+      color: var(--bg-primary);
     }
 
     .btn-primary:active {
@@ -328,14 +330,14 @@
     }
 
     .btn-danger {
-      background: var(--bg-primary);
-      color: var(--error);
-      border: 1px solid rgba(239, 68, 68, 0.3);
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      border: 1px solid var(--border-light);
     }
 
     .btn-danger:hover {
-      background: rgba(239, 68, 68, 0.05);
-      border-color: var(--error);
+      background: var(--neutral-200);
+      border-color: var(--border-medium);
     }
 
     .btn-group {
@@ -371,10 +373,9 @@
     }
 
     .toggle-btn.active {
-      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-      color: white;
-      border-color: transparent;
-      box-shadow: var(--shadow-sm);
+      background: var(--text-primary);
+      color: var(--bg-primary);
+      border-color: var(--text-primary);
     }
 
     .status-pill {
@@ -390,9 +391,9 @@
     }
 
     .status-pill.active {
-      background: linear-gradient(135deg, rgba(42, 163, 254, 0.15), rgba(16, 185, 120, 0.15));
-      color: var(--accent-blue);
-      border: 1px solid rgba(42, 163, 254, 0.3);
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      border: 1px solid var(--border-light);
     }
 
     .divider {
@@ -467,9 +468,8 @@
     }
 
     .mode-tab.active {
-      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-      color: white;
-      box-shadow: var(--shadow-sm);
+      background: var(--text-primary);
+      color: var(--bg-primary);
     }
 
     .main-grid {
@@ -514,13 +514,14 @@
 
     .chart-container {
       height: 400px;
-      background: var(--bg-secondary);
+      background: var(--bg-primary);
       border-radius: var(--radius-lg);
       padding: var(--space-md);
       position: relative;
     }
 
     #timeseriesChart,
+    #fftChart,
     #bandsChart {
       width: 100%;
       height: 100%;
@@ -544,9 +545,9 @@
       border-radius: var(--radius-full);
       font-size: 12px;
       font-weight: 500;
-      background: linear-gradient(135deg, rgba(42, 163, 254, 0.1), rgba(183, 67, 198, 0.1));
-      color: var(--accent-blue);
-      border: 1px solid rgba(42, 163, 254, 0.2);
+      background: var(--bg-elevated);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-light);
     }
 
     .badge-dot {
@@ -567,15 +568,15 @@
     }
 
     .alert-error {
-      background: rgba(239, 68, 68, 0.1);
-      color: var(--error);
-      border: 1px solid rgba(239, 68, 68, 0.3);
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      border: 1px solid var(--border-light);
     }
 
     .alert-success {
-      background: rgba(16, 185, 120, 0.1);
-      color: var(--success);
-      border: 1px solid rgba(16, 185, 120, 0.3);
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      border: 1px solid var(--border-light);
     }
 
     /* Responsive */
@@ -739,7 +740,8 @@
       </div>
       <div class="mode-tabs">
         <button id="tab-timeseries" class="mode-tab active">Time Series</button>
-        <button id="tab-bands" class="mode-tab">Frequency Bands</button>
+        <button id="tab-fft" class="mode-tab">FFT</button>
+        <button id="tab-bands" class="mode-tab">Bands</button>
       </div>
     </header>
 
@@ -759,6 +761,7 @@
 
         <div class="chart-container">
           <canvas id="timeseriesChart"></canvas>
+          <canvas id="fftChart" style="display:none;"></canvas>
           <canvas id="bandsChart" style="display:none;"></canvas>
         </div>
 
@@ -869,7 +872,7 @@
         streamPill.classList.remove("active");
       }
       chipMode.textContent = streaming
-        ? `Streaming: ${currentMode === "timeseries" ? "time series" : "frequency bands"}`
+        ? `Streaming: ${currentMode === "timeseries" ? "time series" : currentMode === "fft" ? "FFT" : "frequency bands"}`
         : "Streaming: stopped";
     }
 
@@ -1024,25 +1027,36 @@
 
     // Mode tabs
     const tabTS = document.getElementById("tab-timeseries");
+    const tabFFT = document.getElementById("tab-fft");
     const tabBands = document.getElementById("tab-bands");
     tabTS.onclick = () => switchMode("timeseries");
+    tabFFT.onclick = () => switchMode("fft");
     tabBands.onclick = () => switchMode("bands");
 
     function switchMode(mode) {
       if (mode === currentMode) return;
       currentMode = mode;
       tabTS.classList.toggle("active", mode === "timeseries");
+      tabFFT.classList.toggle("active", mode === "fft");
       tabBands.classList.toggle("active", mode === "bands");
 
       if (mode === "timeseries") {
         visualTitle.textContent = "Time Series";
         visualSubtitle.textContent = "4-channel windowed EEG traces with temporal dynamics";
         document.getElementById("timeseriesChart").style.display = "block";
+        document.getElementById("fftChart").style.display = "none";
+        document.getElementById("bandsChart").style.display = "none";
+      } else if (mode === "fft") {
+        visualTitle.textContent = "FFT Spectrum";
+        visualSubtitle.textContent = "Real-time frequency domain analysis using Fast Fourier Transform";
+        document.getElementById("timeseriesChart").style.display = "none";
+        document.getElementById("fftChart").style.display = "block";
         document.getElementById("bandsChart").style.display = "none";
       } else {
         visualTitle.textContent = "Frequency Bands";
         visualSubtitle.textContent = "Per-channel power distribution across delta, theta, alpha, beta, and gamma bands";
         document.getElementById("timeseriesChart").style.display = "none";
+        document.getElementById("fftChart").style.display = "none";
         document.getElementById("bandsChart").style.display = "block";
       }
 
@@ -1067,6 +1081,7 @@
 
     // Charts with Eleven Labs inspired colors
     const tsCtx = document.getElementById("timeseriesChart").getContext("2d");
+    const fftCtx = document.getElementById("fftChart").getContext("2d");
     const bandsCtx = document.getElementById("bandsChart").getContext("2d");
 
     const chartColors = [
@@ -1092,17 +1107,17 @@
         scales: {
           x: {
             ticks: {
-              color: "#9CA3AF",
+              color: "#666666",
               font: { family: 'Inter' }
             },
-            grid: { color: "rgba(229, 229, 229, 0.5)" },
+            grid: { color: "rgba(51, 51, 51, 0.5)" },
           },
           y: {
             ticks: {
-              color: "#9CA3AF",
+              color: "#666666",
               font: { family: 'Inter' }
             },
-            grid: { color: "rgba(229, 229, 229, 0.5)" },
+            grid: { color: "rgba(51, 51, 51, 0.5)" },
           },
         },
         interaction: {
@@ -1112,7 +1127,7 @@
         plugins: {
           legend: {
             labels: {
-              color: "#6B7280",
+              color: "#999999",
               usePointStyle: true,
               font: { family: 'Inter', weight: '500' }
             },
@@ -1127,6 +1142,71 @@
           line: {
             tension: 0.4,
             borderWidth: 2.5,
+          },
+          point: { radius: 0 },
+        },
+      },
+    });
+
+    let fftChart = new Chart(fftCtx, {
+      type: "line",
+      data: {
+        labels: [],
+        datasets: [],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+          duration: 150,
+          easing: 'linear'
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: "#666666",
+              font: { family: 'Inter' }
+            },
+            grid: { color: "rgba(51, 51, 51, 0.5)" },
+            title: {
+              display: true,
+              text: 'Frequency (Hz)',
+              color: "#999999",
+              font: { family: 'Inter', weight: '500' }
+            }
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              color: "#666666",
+              font: { family: 'Inter' }
+            },
+            grid: { color: "rgba(51, 51, 51, 0.5)" },
+            title: {
+              display: true,
+              text: 'Power Spectral Density',
+              color: "#999999",
+              font: { family: 'Inter', weight: '500' }
+            }
+          },
+        },
+        interaction: {
+          mode: 'nearest',
+          intersect: false
+        },
+        plugins: {
+          legend: {
+            labels: {
+              color: "#999999",
+              usePointStyle: true,
+              font: { family: 'Inter', weight: '500' }
+            },
+          },
+        },
+        elements: {
+          line: {
+            tension: 0.1,
+            borderWidth: 2,
           },
           point: { radius: 0 },
         },
@@ -1149,22 +1229,22 @@
         scales: {
           x: {
             ticks: {
-              color: "#9CA3AF",
+              color: "#666666",
               font: { family: 'Inter', size: 11 }
             },
-            grid: { color: "rgba(229, 229, 229, 0.5)" },
+            grid: { color: "rgba(51, 51, 51, 0.5)" },
           },
           y: {
             beginAtZero: true,
             ticks: {
-              color: "#9CA3AF",
+              color: "#666666",
               font: { family: 'Inter' }
             },
-            grid: { color: "rgba(229, 229, 229, 0.5)" },
+            grid: { color: "rgba(51, 51, 51, 0.5)" },
             title: {
               display: true,
               text: 'Power',
-              color: "#6B7280",
+              color: "#999999",
               font: { family: 'Inter', weight: '500' }
             }
           },
@@ -1172,7 +1252,7 @@
         plugins: {
           legend: {
             labels: {
-              color: "#6B7280",
+              color: "#999999",
               usePointStyle: true,
               font: { family: 'Inter', weight: '500' }
             },
@@ -1201,6 +1281,26 @@
         });
       }
       tsChart.update("none");
+    }
+
+    function updateFFTChart(channels, freqs, psd) {
+      if (!psd || psd.length === 0 || !freqs || freqs.length === 0) return;
+
+      fftChart.data.labels = freqs.map(f => f.toFixed(1));
+
+      if (fftChart.data.datasets.length !== channels.length) {
+        fftChart.data.datasets = channels.map((chName, idx) => ({
+          label: chName,
+          data: psd[idx],
+          borderColor: chartColors[idx % chartColors.length],
+          backgroundColor: "transparent",
+        }));
+      } else {
+        channels.forEach((_, idx) => {
+          fftChart.data.datasets[idx].data = psd[idx];
+        });
+      }
+      fftChart.update("none");
     }
 
     function updateBandsChart(channels, bandNames, values) {
@@ -1249,6 +1349,8 @@
         const msg = JSON.parse(event.data);
         if (msg.type === "timeseries") {
           updateTimeSeriesChart(msg.channels, msg.data);
+        } else if (msg.type === "fft") {
+          updateFFTChart(msg.channels, msg.freqs, msg.psd);
         } else if (msg.type === "bands") {
           updateBandsChart(msg.channels, msg.bands, msg.values);
         } else if (msg.type === "error") {

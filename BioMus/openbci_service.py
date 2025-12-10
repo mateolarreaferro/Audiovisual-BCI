@@ -129,6 +129,57 @@ class GanglionService:
         channel_names = [f"CH{idx+1}" for idx in range(len(ch_indices))]
         return channel_names, ts_data
 
+    def get_fft_spectrum(
+        self,
+        window_sec: float = 4.0,
+        max_freq: float = 50.0,
+    ) -> Tuple[List[str], List[float], List[List[float]]]:
+        """
+        Returns (channel_names, freqs, psd[channels][freqs])
+        """
+        if not (self.connected and self.streaming and self.board):
+            return [], [], []
+
+        sampling_rate = BoardShim.get_sampling_rate(self.board_id)
+        n_samples = int(window_sec * sampling_rate)
+
+        with self.lock:
+            data = self.board.get_current_board_data(n_samples)
+
+        ch_indices = self._get_exg_channels()
+        if data.shape[1] == 0:
+            return [], [], []
+
+        channel_names = [f"CH{idx+1}" for idx in range(len(ch_indices))]
+        all_psd: List[List[float]] = []
+        freq_list: List[float] = []
+
+        for ch_idx, ch in enumerate(ch_indices):
+            sig = data[ch, :].astype(np.float64)
+            if sig.size < 32:
+                all_psd.append([])
+                continue
+
+            # detrend + PSD with Welch via BrainFlow helper
+            DataFilter.detrend(sig, DetrendOperations.LINEAR.value)
+            fft_len = DataFilter.get_nearest_power_of_two(sig.size)
+            psd, freqs = DataFilter.get_psd_welch(
+                sig, fft_len, fft_len // 2, sampling_rate,
+                WindowOperations.HANNING.value
+            )
+
+            # Filter to max_freq
+            mask = freqs <= max_freq
+            filtered_freqs = freqs[mask]
+            filtered_psd = psd[mask]
+
+            if ch_idx == 0:
+                freq_list = filtered_freqs.tolist()
+
+            all_psd.append(filtered_psd.tolist())
+
+        return channel_names, freq_list, all_psd
+
     def get_band_powers(
         self,
         window_sec: float = 4.0,

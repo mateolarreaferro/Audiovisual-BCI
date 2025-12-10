@@ -164,45 +164,82 @@ async def api_osc_config(payload: dict):
 @app.websocket("/ws/stream")
 async def ws_stream(ws: WebSocket):
     await ws.accept()
+
+    # Configuration state (use dict for mutability across async tasks)
+    config = {
+        "mode": "timeseries",
+        "window_sec": 4.0,
+        "send_interval_ms": 100
+    }
+
     try:
         # Expect initial config message
         init_msg = await ws.receive_json()
-        mode = init_msg.get("mode", "timeseries")
-        window_sec = float(init_msg.get("window_sec", 4.0))
-        send_interval_ms = int(init_msg.get("interval_ms", 100))
+        config["mode"] = init_msg.get("mode", "timeseries")
+        config["window_sec"] = float(init_msg.get("window_sec", 4.0))
+        config["send_interval_ms"] = int(init_msg.get("interval_ms", 100))
 
+        # Create task for streaming
+        async def stream_data():
+            while True:
+                if not (service.connected and service.streaming):
+                    await asyncio.sleep(0.5)
+                    continue
+
+                if config["mode"] == "timeseries":
+                    channels, data = service.get_timeseries_window(window_sec=config["window_sec"])
+                    if channels:
+                        # push OSC
+                        service.osc_push_timeseries(channels, data)
+                        await ws.send_json(
+                            {
+                                "type": "timeseries",
+                                "channels": channels,
+                                "data": data,
+                            }
+                        )
+
+                elif config["mode"] == "fft":
+                    channels, freqs, psd = service.get_fft_spectrum(window_sec=config["window_sec"])
+                    if channels:
+                        await ws.send_json(
+                            {
+                                "type": "fft",
+                                "channels": channels,
+                                "freqs": freqs,
+                                "psd": psd,
+                            }
+                        )
+
+                elif config["mode"] == "bands":
+                    channels, band_names, values = service.get_band_powers(window_sec=config["window_sec"])
+                    if channels:
+                        service.osc_push_bands(channels, band_names, values)
+                        await ws.send_json(
+                            {
+                                "type": "bands",
+                                "channels": channels,
+                                "bands": band_names,
+                                "values": values,
+                            }
+                        )
+
+                await asyncio.sleep(config["send_interval_ms"] / 1000.0)
+
+        # Start streaming task
+        stream_task = asyncio.create_task(stream_data())
+
+        # Listen for mode changes
         while True:
-            if not (service.connected and service.streaming):
-                await asyncio.sleep(0.5)
-                continue
-
-            if mode == "timeseries":
-                channels, data = service.get_timeseries_window(window_sec=window_sec)
-                if channels:
-                    # push OSC
-                    service.osc_push_timeseries(channels, data)
-                    await ws.send_json(
-                        {
-                            "type": "timeseries",
-                            "channels": channels,
-                            "data": data,
-                        }
-                    )
-
-            elif mode == "bands":
-                channels, band_names, values = service.get_band_powers(window_sec=window_sec)
-                if channels:
-                    service.osc_push_bands(channels, band_names, values)
-                    await ws.send_json(
-                        {
-                            "type": "bands",
-                            "channels": channels,
-                            "bands": band_names,
-                            "values": values,
-                        }
-                    )
-
-            await asyncio.sleep(send_interval_ms / 1000.0)
+            try:
+                msg = await asyncio.wait_for(ws.receive_json(), timeout=0.1)
+                config["mode"] = msg.get("mode", config["mode"])
+                config["window_sec"] = float(msg.get("window_sec", config["window_sec"]))
+                config["send_interval_ms"] = int(msg.get("interval_ms", config["send_interval_ms"]))
+            except asyncio.TimeoutError:
+                # No new message, continue streaming
+                pass
+            await asyncio.sleep(0.1)
 
     except WebSocketDisconnect:
         return
