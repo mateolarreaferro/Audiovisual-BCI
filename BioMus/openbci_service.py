@@ -50,6 +50,29 @@ class GanglionService:
         self.board.prepare_session()
         self.connected = True
 
+        # Configure board: disable test signal and enable all channels
+        try:
+            import time
+            time.sleep(0.5)  # Wait for board to be fully ready
+
+            # Disable test signal
+            self.board.config_board("]")
+            print("[BioMus] Sent test signal OFF command (])")
+            time.sleep(0.1)
+
+            # Enable all 4 channels (! @ # $ for channels 1-4)
+            self.board.config_board("!")
+            self.board.config_board("@")
+            self.board.config_board("#")
+            self.board.config_board("$")
+            print("[BioMus] Enabled all 4 channels (! @ # $)")
+            time.sleep(0.1)
+
+        except Exception as e:
+            print(f"[BioMus] Failed to configure board: {e}")
+            # If command fails, continue anyway
+            pass
+
     def disconnect(self):
         if not self.connected or self.board is None:
             return
@@ -69,6 +92,14 @@ class GanglionService:
             raise RuntimeError("Board not connected")
         if self.streaming:
             return
+        # Ensure test signal is OFF before starting stream
+        import time
+        try:
+            self.board.config_board("]")
+            print("[BioMus] Before stream: Sent test signal OFF command (])")
+            time.sleep(0.2)
+        except Exception as e:
+            print(f"[BioMus] Failed to send OFF command before stream: {e}")
         self.board.start_stream(buffer_size)
         self.streaming = True
 
