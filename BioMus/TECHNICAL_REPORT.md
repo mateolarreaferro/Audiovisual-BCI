@@ -69,8 +69,6 @@ Drawing from our explorations, we designed BioMus around three core principles:
 
 ### 3.2 Hardware Architecture
 
-![BioMus Interface](Pictures/Interface.png)
-
 #### 3.2.1 Electrode Configuration
 **4-Channel Layout:**
 - **2 Frontal electrodes (Fp1, Fp2):** Positioned above eyebrows
@@ -91,6 +89,12 @@ Drawing from our explorations, we designed BioMus around three core principles:
 - Reduces setup friction
 - Enables spontaneous creative sessions
 - Trade-off: Slightly higher impedance vs. wet electrodes
+
+![BioMus Interface](Pictures/Interface.png)
+*Figure 1: BioMus web interface showing real-time EEG visualization and control panel*
+
+![Computer Vision Mode](Pictures/Computer%20Vision%20Mode.png)
+*Figure 2: Camera/FaceSynth mode with live facial feature tracking and parameter extraction*
 
 #### 3.2.2 Signal Acquisition: OpenBCI Ganglion
 **Board Specifications:**
@@ -118,32 +122,36 @@ Electrode → Analog Front-End → 24-bit ADC → Microcontroller → BLE → Co
 ### 4.1 System Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                        BioMus Platform                       │
-├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  ┌──────────────┐      ┌──────────────┐                    │
-│  │   Ganglion   │◄────►│   Camera     │                    │
-│  │   Service    │      │   Service    │                    │
-│  └──────┬───────┘      └──────┬───────┘                    │
-│         │                     │                             │
-│         │                     │                             │
-│  ┌──────▼──────────────────────▼──────┐                    │
-│  │      Signal Processing Engine      │                    │
-│  │   - FFT (Welch PSD)                │                    │
-│  │   - Band Power (δ,θ,α,β,γ)        │                    │
-│  │   - Facial Feature Extraction      │                    │
-│  └──────┬──────────────────────────────┘                   │
-│         │                                                   │
-│         ├──────────┬──────────────┬────────────┐          │
-│         ▼          ▼              ▼            ▼          │
-│   ┌─────────┐  ┌──────┐   ┌──────────┐  ┌──────────┐    │
-│   │   Web   │  │ OSC  │   │  Local   │  │  Future  │    │
-│   │   UI    │  │Output│   │  Audio   │  │   Apps   │    │
-│   │(Viz+Ctl)│  │      │   │(Csound)  │  │          │    │
-│   └─────────┘  └──────┘   └──────────┘  └──────────┘    │
-│                                                            │
-└────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────────┐
+│                         BioMus Platform                           │
+├───────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│    ┌──────────────┐                    ┌──────────────┐         │
+│    │   Ganglion   │                    │   Camera     │         │
+│    │   Service    │                    │   Service    │         │
+│    └──────┬───────┘                    └──────┬───────┘         │
+│           │                                   │                  │
+│           │                                   │                  │
+│           └─────────────┬─────────────────────┘                  │
+│                         │                                        │
+│                         ▼                                        │
+│           ┌─────────────────────────────────┐                   │
+│           │  Signal Processing Engine       │                   │
+│           │  - FFT (Welch PSD)              │                   │
+│           │  - Band Power (δ,θ,α,β,γ)      │                   │
+│           │  - Facial Feature Extraction    │                   │
+│           └─────────────┬───────────────────┘                   │
+│                         │                                        │
+│          ┌──────────────┼──────────────┬──────────────┐        │
+│          │              │              │              │        │
+│          ▼              ▼              ▼              ▼        │
+│    ┌─────────┐    ┌─────────┐   ┌──────────┐   ┌──────────┐  │
+│    │   Web   │    │   OSC   │   │  Local   │   │  Future  │  │
+│    │   UI    │    │ Output  │   │  Audio   │   │   Apps   │  │
+│    │(Viz+Ctl)│    │         │   │ (Csound) │   │          │  │
+│    └─────────┘    └─────────┘   └──────────┘   └──────────┘  │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ### 4.2 Backend Implementation
@@ -199,8 +207,6 @@ For each channel:
 ```
 
 #### 4.2.3 Computer Vision Integration
-
-![Computer Vision Mode](Pictures/Computer%20Vision%20Mode.png)
 
 **Facial Feature Extraction:**
 ```python
@@ -291,9 +297,9 @@ IP Address: [127.0.0.1    ]
 Port:       [9000         ]
 
 Data Streams:
-  ☑ Timeseries  → /eeg/raw/CH{1-4}
-  ☑ Bands       → /eeg/bands/{delta,theta,alpha,beta,gamma}/CH{1-4}
-  ☑ FaceSynth   → /cv/face/{mouth,roll,smile}
+  [X] Timeseries  → /eeg/raw/CH{1-4}
+  [X] Bands       → /eeg/bands/{delta,theta,alpha,beta,gamma}/CH{1-4}
+  [X] FaceSynth   → /cv/face/{mouth,roll,smile}
 
 [Enable OSC] button
 ```
@@ -301,8 +307,8 @@ Data Streams:
 **Visualization Controls:**
 ```
 Y-Scale Mode:
-  ○ Manual  [Slider: ±25 to ±10000]
-  ● Auto    (Adaptive with smoothing)
+  [ ] Manual  [Slider: ±25 to ±10000]
+  [X] Auto    (Adaptive with smoothing)
 
 Mode Tabs:
   [Time Series] [FFT] [Bands] [Camera]
@@ -375,15 +381,15 @@ Rate: ~30 Hz (camera framerate dependent)
 ## 5. Current System Status
 
 ### 5.1 Implemented Features
-- ✅ Bluetooth LE and BLED112 dongle connectivity
-- ✅ 4-channel EEG acquisition @ 200 Hz
-- ✅ Real-time signal processing (FFT, band powers)
-- ✅ Multi-modal visualization (time series, FFT, bands, camera)
-- ✅ Computer vision facial tracking (mouth, roll, smile)
-- ✅ OSC output for creative applications
-- ✅ Web-based interface with responsive design
-- ✅ Adaptive and manual scaling controls
-- ✅ Smooth 20 Hz visualization updates
+- [DONE] Bluetooth LE and BLED112 dongle connectivity
+- [DONE] 4-channel EEG acquisition @ 200 Hz
+- [DONE] Real-time signal processing (FFT, band powers)
+- [DONE] Multi-modal visualization (time series, FFT, bands, camera)
+- [DONE] Computer vision facial tracking (mouth, roll, smile)
+- [DONE] OSC output for creative applications
+- [DONE] Web-based interface with responsive design
+- [DONE] Adaptive and manual scaling controls
+- [DONE] Smooth 20 Hz visualization updates
 
 ### 5.2 Technical Specifications
 ```
@@ -764,8 +770,8 @@ Session 5: Free exploration / performance mode
 - **User agency:** Users define success, not clinicians or researchers
 
 **Example Language:**
-- ❌ "Train your brain to achieve optimal focus"
-- ✅ "Discover how your unique brain rhythms can shape sound and visuals"
+- AVOID: "Train your brain to achieve optimal focus"
+- PREFER: "Discover how your unique brain rhythms can shape sound and visuals"
 
 ---
 
@@ -783,23 +789,23 @@ BioMus represents a significant step toward **democratizing brain-computer inter
 ### 9.2 Immediate Next Steps
 
 **Technical Development (Q1-Q2 2026):**
-1. ✅ Complete camera integration (DONE)
-2. ⬜ Implement Csound OSC receiver and basic synthesis mappings
-3. ⬜ Develop TouchDesigner/Processing visual templates
-4. ⬜ Add user calibration workflow (baseline + adaptive thresholding)
-5. ⬜ Optimize artifact rejection (EMG/EOG filtering)
+1. [DONE] Complete camera integration
+2. [TODO] Implement Csound OSC receiver and basic synthesis mappings
+3. [TODO] Develop TouchDesigner/Processing visual templates
+4. [TODO] Add user calibration workflow (baseline + adaptive thresholding)
+5. [TODO] Optimize artifact rejection (EMG/EOG filtering)
 
 **User Testing (Q2-Q3 2026):**
-1. ⬜ Recruit 5-10 pilot users with motor impairments
-2. ⬜ Conduct usability testing sessions (2-3 sessions/user)
-3. ⬜ Gather qualitative feedback on empowerment and creative expression
-4. ⬜ Iterate on interface design based on findings
+1. [TODO] Recruit 5-10 pilot users with motor impairments
+2. [TODO] Conduct usability testing sessions (2-3 sessions/user)
+3. [TODO] Gather qualitative feedback on empowerment and creative expression
+4. [TODO] Iterate on interface design based on findings
 
 **Application Development (Q3-Q4 2026):**
-1. ⬜ Prototype "Alpha Garden" self-regulation app
-2. ⬜ Develop musical performance templates (ambient, rhythmic, melodic)
-3. ⬜ Create tutorial series (video + written guides)
-4. ⬜ Build community forum for sharing mappings and creations
+1. [TODO] Prototype "Alpha Garden" self-regulation app
+2. [TODO] Develop musical performance templates (ambient, rhythmic, melodic)
+3. [TODO] Create tutorial series (video + written guides)
+4. [TODO] Build community forum for sharing mappings and creations
 
 ### 9.3 Long-Term Vision
 
