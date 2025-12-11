@@ -665,6 +665,51 @@
       transform: translateX(16px);
     }
 
+    /* Custom Range Slider */
+    .custom-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      background: var(--border-light);
+      border-radius: var(--radius-full);
+      outline: none;
+    }
+
+    .custom-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      background: var(--text-primary);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .custom-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.1);
+    }
+
+    .custom-slider::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      background: var(--text-primary);
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .custom-slider::-moz-range-thumb:hover {
+      transform: scale(1.1);
+    }
+
+    .custom-slider::-moz-range-track {
+      background: var(--border-light);
+      border-radius: var(--radius-full);
+      height: 4px;
+    }
+
     /* Camera/FaceSynth Feature Meters */
     .feature-meter {
       display: flex;
@@ -908,7 +953,7 @@
             </div>
             <div style="display: flex; align-items: center; gap: 8px;">
               <label style="font-size: 12px; color: var(--text-secondary); font-weight: 500;">Y-Scale:</label>
-              <input type="range" id="scale-slider" min="50" max="5000" value="100" step="50" style="width: 120px; cursor: pointer;">
+              <input type="range" id="scale-slider" min="25" max="10000" value="100" step="25" class="custom-slider" style="width: 120px; cursor: pointer;">
               <span id="scale-value" style="font-size: 12px; color: var(--text-primary); font-weight: 500; min-width: 60px;">±100</span>
             </div>
           </div>
