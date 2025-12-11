@@ -90,11 +90,14 @@ Drawing from our explorations, we designed BioMus around three core principles:
 - Enables spontaneous creative sessions
 - Trade-off: Slightly higher impedance vs. wet electrodes
 
-![BioMus Interface](Pictures/Interface.png)
-*Figure 1: BioMus web interface showing real-time EEG visualization and control panel*
+![Hardware System](Pictures/Hardware%20System.png)
+*Figure 1: BioMus hardware system - OpenBCI Ganglion board with electrode connections*
 
-![Computer Vision Mode](Pictures/Computer%20Vision%20Mode.png)
-*Figure 2: Camera/FaceSynth mode with live facial feature tracking and parameter extraction*
+![Frontal Electrodes](Pictures/frontal%20electrodes.png)
+*Figure 2: Frontal electrode placement (Fp1, Fp2) - positioned above eyebrows for prefrontal cortex activity*
+
+![Parietal Electrodes](Pictures/parietal%20electrodes.png)
+*Figure 3: Parietal electrode placement (P3, P4) - positioned on posterior scalp for alpha rhythm detection*
 
 #### 3.2.2 Signal Acquisition: OpenBCI Ganglion
 **Board Specifications:**
@@ -122,37 +125,42 @@ Electrode → Analog Front-End → 24-bit ADC → Microcontroller → BLE → Co
 ### 4.1 System Architecture
 
 ```
-┌───────────────────────────────────────────────────────────────────┐
-│                         BioMus Platform                           │
-├───────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│    ┌──────────────┐                    ┌──────────────┐         │
-│    │   Ganglion   │                    │   Camera     │         │
-│    │   Service    │                    │   Service    │         │
-│    └──────┬───────┘                    └──────┬───────┘         │
-│           │                                   │                  │
-│           │                                   │                  │
-│           └─────────────┬─────────────────────┘                  │
-│                         │                                        │
-│                         ▼                                        │
-│           ┌─────────────────────────────────┐                   │
-│           │  Signal Processing Engine       │                   │
-│           │  - FFT (Welch PSD)              │                   │
-│           │  - Band Power (δ,θ,α,β,γ)      │                   │
-│           │  - Facial Feature Extraction    │                   │
-│           └─────────────┬───────────────────┘                   │
-│                         │                                        │
-│          ┌──────────────┼──────────────┬──────────────┐        │
-│          │              │              │              │        │
-│          ▼              ▼              ▼              ▼        │
-│    ┌─────────┐    ┌─────────┐   ┌──────────┐   ┌──────────┐  │
-│    │   Web   │    │   OSC   │   │  Local   │   │  Future  │  │
-│    │   UI    │    │ Output  │   │  Audio   │   │   Apps   │  │
-│    │(Viz+Ctl)│    │         │   │ (Csound) │   │          │  │
-│    └─────────┘    └─────────┘   └──────────┘   └──────────┘  │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────┐
+│                         BioMus Platform                            │
+├────────────────────────────────────────────────────────────────────┤
+│                                                                    │
+│   ┌────────────────┐                  ┌────────────────┐          │
+│   │   Ganglion     │                  │    Camera      │          │
+│   │   Service      │                  │    Service     │          │
+│   └────────┬───────┘                  └────────┬───────┘          │
+│            │                                   │                   │
+│            └───────────────┬───────────────────┘                   │
+│                            │                                       │
+│                            ▼                                       │
+│            ┌───────────────────────────────┐                       │
+│            │  Signal Processing Engine     │                       │
+│            │  - FFT (Welch PSD)            │                       │
+│            │  - Band Power (δ,θ,α,β,γ)    │                       │
+│            │  - Facial Feature Extraction  │                       │
+│            └───────────────┬───────────────┘                       │
+│                            │                                       │
+│        ┌───────────────────┼───────────────────┬──────────┐       │
+│        │                   │                   │          │       │
+│        ▼                   ▼                   ▼          ▼       │
+│   ┌─────────┐        ┌─────────┐        ┌──────────┐ ┌────────┐ │
+│   │   Web   │        │   OSC   │        │  Local   │ │ Future │ │
+│   │   UI    │        │ Output  │        │  Audio   │ │  Apps  │ │
+│   │(Viz+Ctl)│        │         │        │ (Csound) │ │        │ │
+│   └─────────┘        └─────────┘        └──────────┘ └────────┘ │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
 ```
+
+![Software Interface](Pictures/Software%20Interface.png)
+*Figure 4: BioMus software interface showing real-time EEG visualization and control panel*
+
+![Computer Vision Mode](Pictures/Computer%20Vision%20Mode.png)
+*Figure 5: Computer vision mode with live facial feature tracking and OSC parameter extraction*
 
 ### 4.2 Backend Implementation
 
