@@ -10,44 +10,44 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      /* Minimal Black & White Theme (Eleven Labs inspired) */
-      --bg-primary: #000000;
-      --bg-secondary: #0A0A0A;
-      --bg-tertiary: #141414;
-      --bg-elevated: #1A1A1A;
+      /* Minimal White & Black Theme - Professional & Clean */
+      --bg-primary: #FFFFFF;
+      --bg-secondary: #FAFAFA;
+      --bg-tertiary: #F5F5F5;
+      --bg-elevated: #FFFFFF;
 
-      /* Accent colors - for brain wave visualizations only */
+      /* Accent colors - for visualizations */
       --accent-blue: #2AA3FE;
       --accent-green: #10B978;
       --accent-purple: #B743C6;
       --accent-orange: #F58633;
 
-      /* Neutrals - grayscale only */
-      --neutral-900: #FFFFFF;
-      --neutral-800: #E5E5E5;
-      --neutral-700: #CCCCCC;
-      --neutral-600: #999999;
-      --neutral-500: #666666;
-      --neutral-400: #4D4D4D;
-      --neutral-300: #333333;
-      --neutral-200: #1F1F1F;
-      --neutral-100: #141414;
+      /* Neutrals - grayscale inverted */
+      --neutral-900: #000000;
+      --neutral-800: #1A1A1A;
+      --neutral-700: #333333;
+      --neutral-600: #666666;
+      --neutral-500: #999999;
+      --neutral-400: #B3B3B3;
+      --neutral-300: #CCCCCC;
+      --neutral-200: #E0E0E0;
+      --neutral-100: #F5F5F5;
 
       /* Semantic colors */
-      --text-primary: #FFFFFF;
-      --text-secondary: #999999;
-      --text-tertiary: #666666;
-      --success: #FFFFFF;
-      --error: #FFFFFF;
-      --warning: #FFFFFF;
+      --text-primary: #000000;
+      --text-secondary: #666666;
+      --text-tertiary: #999999;
+      --success: #000000;
+      --error: #000000;
+      --warning: #000000;
 
       /* Borders & shadows */
-      --border-light: #333333;
-      --border-medium: #4D4D4D;
-      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
-      --shadow-lg: 0 10px 24px rgba(0, 0, 0, 0.5);
-      --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.6);
+      --border-light: #E0E0E0;
+      --border-medium: #CCCCCC;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+      --shadow-lg: 0 10px 24px rgba(0, 0, 0, 0.15);
+      --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.2);
 
       /* Radius */
       --radius-sm: 4px;
@@ -220,7 +220,7 @@
 
     .status-indicator.connected {
       background: var(--text-primary);
-      box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.15);
+      box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
       animation: pulse 2s ease-in-out infinite;
     }
 
@@ -272,8 +272,8 @@
 
     input:focus {
       outline: none;
-      border-color: var(--accent-blue);
-      box-shadow: 0 0 0 3px rgba(42, 163, 254, 0.1);
+      border-color: var(--text-primary);
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
     }
 
     input::placeholder {
@@ -306,38 +306,43 @@
       background: var(--text-primary);
       color: var(--bg-primary);
       border: 1px solid var(--text-primary);
+      box-shadow: var(--shadow-sm);
     }
 
     .btn-primary:hover {
       background: var(--neutral-800);
       border-color: var(--neutral-800);
       color: var(--bg-primary);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
     }
 
     .btn-primary:active {
       transform: translateY(0);
+      box-shadow: var(--shadow-sm);
     }
 
     .btn-secondary {
       background: var(--bg-primary);
       color: var(--text-primary);
-      border: 1px solid var(--border-light);
+      border: 1px solid var(--border-medium);
     }
 
     .btn-secondary:hover {
-      background: var(--bg-secondary);
-      border-color: var(--border-medium);
+      background: var(--bg-tertiary);
+      border-color: var(--neutral-600);
     }
 
     .btn-danger {
-      background: var(--bg-elevated);
-      color: var(--text-primary);
+      background: var(--bg-primary);
+      color: var(--text-secondary);
       border: 1px solid var(--border-light);
     }
 
     .btn-danger:hover {
-      background: var(--neutral-200);
+      background: var(--bg-tertiary);
       border-color: var(--border-medium);
+      color: var(--text-primary);
     }
 
     .btn-group {
@@ -483,7 +488,7 @@
       border: 1px solid var(--border-light);
       border-radius: var(--radius-xl);
       padding: var(--space-xl);
-      box-shadow: var(--shadow-lg);
+      box-shadow: var(--shadow-md);
     }
 
     .chart-header {
@@ -514,7 +519,8 @@
 
     .chart-container {
       height: 400px;
-      background: var(--bg-primary);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-light);
       border-radius: var(--radius-lg);
       padding: var(--space-md);
       position: relative;
@@ -559,12 +565,17 @@
     }
 
     .alert {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      max-width: 400px;
       padding: var(--space-md);
       border-radius: var(--radius-md);
       font-size: 13px;
       line-height: 1.6;
-      margin-top: var(--space-md);
       display: none;
+      z-index: 9999;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
     .alert-error {
@@ -577,6 +588,54 @@
       background: var(--bg-elevated);
       color: var(--text-primary);
       border: 1px solid var(--border-light);
+    }
+
+    /* Toggle Switch */
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 36px;
+      height: 20px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      transition: 0.2s;
+      border-radius: 20px;
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 2px;
+      bottom: 2px;
+      background-color: var(--text-secondary);
+      transition: 0.2s;
+      border-radius: 50%;
+    }
+
+    input:checked + .toggle-slider {
+      background-color: var(--text-primary);
+    }
+
+    input:checked + .toggle-slider:before {
+      background-color: var(--bg-primary);
+      transform: translateX(16px);
     }
 
     /* Camera/FaceSynth Feature Meters */
@@ -655,10 +714,10 @@
         <div class="brand-logo">B</div>
         <div class="brand-text">
           <h1>BioMus</h1>
-          <div class="tagline">Neural Audio Interface</div>
+          <div class="tagline">Biosignal Creative Platform</div>
         </div>
       </div>
-      <div class="brand-credit">by Everett Leigh</div>
+      <div class="brand-credit">EEG · CV · OSC</div>
     </div>
 
     <div class="section">
@@ -673,15 +732,15 @@
         <div class="card-header">
           <div class="step-badge">1</div>
           <div class="card-title-group">
-            <div class="card-title">Connect Device</div>
-            <div class="card-subtitle" id="status-subtext">OpenBCI Ganglion</div>
+            <div class="card-title">Connect EEG</div>
+            <div class="card-subtitle" id="status-subtext">Ready to connect</div>
           </div>
           <div class="status-indicator" id="status-dot"></div>
         </div>
 
         <div class="info-box">
           <strong>Bluetooth:</strong> Leave empty and click Connect<br>
-          <strong>BLED112:</strong> Enter serial port (e.g., /dev/tty.usbmodem14101)
+          <strong>Serial:</strong> Enter port (e.g., /dev/tty.usbmodem14101)
         </div>
 
         <div class="field-group">
@@ -750,7 +809,7 @@
       <div class="main-title-group">
         <h2>Signal Monitor</h2>
         <p class="main-subtitle">
-          Real-time EEG visualization from OpenBCI Ganglion with time series and frequency band analysis.
+          Real-time biosignal visualization with EEG analysis and facial feature tracking for creative control.
         </p>
       </div>
       <div class="mode-tabs">
@@ -822,6 +881,20 @@
           <div class="badge">
             OSC: <span id="chip-osc">disabled</span>
           </div>
+          <div style="margin-left: auto; display: flex; align-items: center; gap: 16px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <label style="font-size: 12px; color: var(--text-secondary); font-weight: 500;">Auto</label>
+              <label class="toggle-switch">
+                <input type="checkbox" id="auto-scale-toggle">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <label style="font-size: 12px; color: var(--text-secondary); font-weight: 500;">Y-Scale:</label>
+              <input type="range" id="scale-slider" min="50" max="5000" value="100" step="50" style="width: 120px; cursor: pointer;">
+              <span id="scale-value" style="font-size: 12px; color: var(--text-primary); font-weight: 500; min-width: 60px;">±100</span>
+            </div>
+          </div>
         </div>
 
         <div id="error-msg" class="alert alert-error"></div>
@@ -859,7 +932,7 @@
           <div class="divider"></div>
 
           <div class="helper-text">
-            Stream data via OSC to external applications (Max/MSP, TouchDesigner, Pure Data, etc.)
+            Stream biosignals via OSC to creative applications (Max/MSP, TouchDesigner, Pure Data, Ableton, etc.)
           </div>
 
           <div style="margin-top: var(--space-md);">
@@ -926,10 +999,10 @@
     function setStatus() {
       if (connected) {
         statusDot.classList.add("connected");
-        statusSub.textContent = streaming ? "Streaming active" : "Connected - ready to stream";
+        statusSub.textContent = streaming ? "Streaming active" : "Connected";
       } else {
         statusDot.classList.remove("connected");
-        statusSub.textContent = "OpenBCI Ganglion";
+        statusSub.textContent = "Ready to connect";
       }
       if (streaming) {
         streamPill.textContent = "Streaming";
@@ -1007,8 +1080,8 @@
         } else {
           connected = false;
           let troubleshoot = input.includes("/dev/")
-            ? "Check that Ganglion is powered on and USB dongle is connected."
-            : "Turn on Ganglion board (blue LED blinking) and ensure Bluetooth is enabled.";
+            ? "Check that EEG device is powered on and USB dongle is connected."
+            : "Turn on EEG device and ensure Bluetooth is enabled.";
           showError(`Connection failed: ${json.message || "Unknown error"}\n\n${troubleshoot}`);
         }
       } catch (error) {
@@ -1137,7 +1210,7 @@
 
       if (mode === "timeseries") {
         visualTitle.textContent = "Time Series";
-        visualSubtitle.textContent = "4-channel windowed EEG traces with temporal dynamics";
+        visualSubtitle.textContent = "Real-time biosignal traces with temporal dynamics";
         document.getElementById("timeseriesChart").style.display = "block";
         document.getElementById("fftChart").style.display = "none";
         document.getElementById("bandsChart").style.display = "none";
@@ -1195,6 +1268,11 @@
       "#F58633", // Orange
     ];
 
+    // Smart adaptive scaling with smoothing to reduce jitter
+    let tsYMin = -100, tsYMax = 100;
+    let fftYMin = -40, fftYMax = 10;
+    let bandsYMax = 50;
+
     let tsChart = new Chart(tsCtx, {
       type: "line",
       data: {
@@ -1214,14 +1292,14 @@
               color: "#666666",
               font: { family: 'Inter' }
             },
-            grid: { color: "rgba(51, 51, 51, 0.5)" },
+            grid: { color: "rgba(0, 0, 0, 0.06)" },
           },
           y: {
             ticks: {
               color: "#666666",
               font: { family: 'Inter' }
             },
-            grid: { color: "rgba(51, 51, 51, 0.5)" },
+            grid: { color: "rgba(0, 0, 0, 0.06)" },
           },
         },
         interaction: {
@@ -1271,7 +1349,7 @@
               color: "#666666",
               font: { family: 'Inter' }
             },
-            grid: { color: "rgba(51, 51, 51, 0.5)" },
+            grid: { color: "rgba(0, 0, 0, 0.06)" },
             title: {
               display: true,
               text: 'Frequency (Hz)',
@@ -1280,12 +1358,11 @@
             }
           },
           y: {
-            beginAtZero: true,
             ticks: {
               color: "#666666",
               font: { family: 'Inter' }
             },
-            grid: { color: "rgba(51, 51, 51, 0.5)" },
+            grid: { color: "rgba(0, 0, 0, 0.06)" },
             title: {
               display: true,
               text: 'Power Spectral Density (dB)',
@@ -1336,7 +1413,7 @@
               color: "#666666",
               font: { family: 'Inter', size: 11 }
             },
-            grid: { color: "rgba(51, 51, 51, 0.5)" },
+            grid: { color: "rgba(0, 0, 0, 0.06)" },
           },
           y: {
             beginAtZero: true,
@@ -1344,10 +1421,10 @@
               color: "#666666",
               font: { family: 'Inter' }
             },
-            grid: { color: "rgba(51, 51, 51, 0.5)" },
+            grid: { color: "rgba(0, 0, 0, 0.06)" },
             title: {
               display: true,
-              text: 'Power',
+              text: 'Power (%)',
               color: "#999999",
               font: { family: 'Inter', weight: '500' }
             }
@@ -1365,10 +1442,63 @@
       },
     });
 
+    // Scale mode state
+    let autoScaleEnabled = false;
+    let scaleValue = 100; // Default to ±100
+
+    const scaleSlider = document.getElementById('scale-slider');
+    const scaleValueDisplay = document.getElementById('scale-value');
+    const autoScaleToggle = document.getElementById('auto-scale-toggle');
+
+    // Slider handler
+    if (scaleSlider && scaleValueDisplay) {
+      scaleSlider.addEventListener('input', (e) => {
+        scaleValue = parseInt(e.target.value);
+        scaleValueDisplay.textContent = `±${scaleValue}`;
+      });
+    }
+
+    // Auto-scale toggle handler
+    if (autoScaleToggle && scaleSlider) {
+      autoScaleToggle.addEventListener('change', (e) => {
+        autoScaleEnabled = e.target.checked;
+        scaleSlider.disabled = autoScaleEnabled;
+        scaleSlider.style.opacity = autoScaleEnabled ? '0.5' : '1';
+      });
+    }
+
     function updateTimeSeriesChart(channels, data) {
       if (!data || data.length === 0) return;
       const n = data[0].length;
       const labels = Array.from({ length: n }, (_, i) => i.toString());
+
+      // Apply scaling based on auto-scale toggle
+      if (autoScaleEnabled) {
+        // Calculate adaptive range with smoothing
+        let dataMin = Infinity, dataMax = -Infinity;
+        data.forEach(channelData => {
+          channelData.forEach(val => {
+            if (val < dataMin) dataMin = val;
+            if (val > dataMax) dataMax = val;
+          });
+        });
+
+        // Smooth the min/max with exponential moving average (reduces jitter)
+        const alpha = 0.15; // Lower = smoother, higher = more responsive
+        tsYMin = tsYMin * (1 - alpha) + dataMin * alpha;
+        tsYMax = tsYMax * (1 - alpha) + dataMax * alpha;
+
+        // Add 10% padding
+        const range = tsYMax - tsYMin;
+        const padding = range * 0.1;
+
+        tsChart.options.scales.y.min = tsYMin - padding;
+        tsChart.options.scales.y.max = tsYMax + padding;
+      } else {
+        // Fixed scale mode using slider value
+        tsChart.options.scales.y.min = -scaleValue;
+        tsChart.options.scales.y.max = scaleValue;
+      }
 
       tsChart.data.labels = labels;
 
@@ -1390,6 +1520,34 @@
     function updateFFTChart(channels, freqs, psd) {
       if (!psd || psd.length === 0 || !freqs || freqs.length === 0) return;
 
+      // Apply scaling based on auto-scale toggle
+      if (autoScaleEnabled) {
+        // Calculate adaptive range with smoothing
+        let dataMin = Infinity, dataMax = -Infinity;
+        psd.forEach(channelData => {
+          channelData.forEach(val => {
+            if (val < dataMin) dataMin = val;
+            if (val > dataMax) dataMax = val;
+          });
+        });
+
+        // Smooth the min/max
+        const alpha = 0.15;
+        fftYMin = fftYMin * (1 - alpha) + dataMin * alpha;
+        fftYMax = fftYMax * (1 - alpha) + dataMax * alpha;
+
+        // Add padding
+        const range = fftYMax - fftYMin;
+        const padding = range * 0.1;
+
+        fftChart.options.scales.y.min = fftYMin - padding;
+        fftChart.options.scales.y.max = fftYMax + padding;
+      } else {
+        // Fixed scale mode for FFT using slider value
+        fftChart.options.scales.y.min = 0;
+        fftChart.options.scales.y.max = scaleValue;
+      }
+
       fftChart.data.labels = freqs.map(f => f.toFixed(1));
 
       if (fftChart.data.datasets.length !== channels.length) {
@@ -1409,6 +1567,30 @@
 
     function updateBandsChart(channels, bandNames, values) {
       if (!values || values.length === 0) return;
+
+      // Apply scaling based on auto-scale toggle
+      if (autoScaleEnabled) {
+        // Calculate adaptive max with smoothing
+        let dataMax = 0;
+        values.forEach(channelData => {
+          channelData.forEach(val => {
+            if (val > dataMax) dataMax = val;
+          });
+        });
+
+        // Smooth the max
+        const alpha = 0.15;
+        bandsYMax = bandsYMax * (1 - alpha) + dataMax * alpha;
+
+        // Add padding and ensure minimum range
+        const paddedMax = Math.max(bandsYMax * 1.2, 10);
+
+        bandsChart.options.scales.y.max = paddedMax;
+      } else {
+        // Fixed scale mode for bands using slider value
+        bandsChart.options.scales.y.min = 0;
+        bandsChart.options.scales.y.max = scaleValue;
+      }
 
       bandsChart.data.labels = bandNames;
 
