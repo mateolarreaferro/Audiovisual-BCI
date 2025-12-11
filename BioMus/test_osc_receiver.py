@@ -63,6 +63,30 @@ def handle_bands(address, *args):
     print()
 
 
+def handle_cv_features(address, *args):
+    """Handle computer vision (facial) features"""
+    feature_name = address.split('/')[-1]
+    value = args[0] if args else 0.0
+
+    # Create a simple bar visualization (0.0 to 1.0 scale)
+    bar_length = int(value * 40)
+    bar = "█" * bar_length
+
+    print(f"😊 CV {feature_name:20s}: {value:6.3f} {bar}")
+
+
+def handle_facesynth(address, *args):
+    """Handle FaceSynth-format messages"""
+    feature_name = address.split('/')[-1]
+    value = args[0] if args else 0.0
+
+    # Create a simple bar visualization (0.0 to 1.0 scale)
+    bar_length = int(value * 40)
+    bar = "█" * bar_length
+
+    print(f"🎭 FaceSynth {feature_name:15s}: {value:6.3f} {bar}")
+
+
 def handle_default(address, *args):
     """Default handler for any unmatched OSC messages"""
     print(f"❓ Unknown OSC message:")
@@ -106,6 +130,10 @@ Example usage:
     # Band power handlers
     dispatcher.map("/eeg/bands/CH*", handle_bands)
 
+    # Computer vision / facial feature handlers
+    dispatcher.map("/cv/face/*", handle_cv_features)
+    dispatcher.map("/faceSynth/*", handle_facesynth)
+
     # Fallback for any other messages
     dispatcher.set_default_handler(handle_default)
 
@@ -115,6 +143,8 @@ Example usage:
     print(f"📡 Waiting for data from BioMus...")
     print(f"   - Raw EEG: /eeg/raw/CH*")
     print(f"   - Band Powers: /eeg/bands/CH*")
+    print(f"   - CV Features: /cv/face/*")
+    print(f"   - FaceSynth: /faceSynth/*")
     print()
     print("Press Ctrl+C to stop")
     print("-" * 80)

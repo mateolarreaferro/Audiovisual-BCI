@@ -579,6 +579,42 @@
       border: 1px solid var(--border-light);
     }
 
+    /* Camera/FaceSynth Feature Meters */
+    .feature-meter {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--text-primary);
+      border-radius: var(--radius-full);
+      transition: width 0.1s ease-out;
+      width: 0%;
+    }
+
+    .feature-value {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-primary);
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
     /* Responsive */
     @media (max-width: 1024px) {
       .main-grid {
@@ -674,26 +710,34 @@
             <div class="card-title">Start Streaming</div>
             <div class="card-subtitle">
               <span id="stream-pill" class="status-pill">Ready</span>
+              <span id="camera-pill" class="status-pill" style="margin-left: 8px;">Camera: Ready</span>
             </div>
           </div>
         </div>
 
-        <div class="btn-group">
-          <button id="btn-start" class="btn btn-primary" style="flex: 1;">
-            Start Stream
-          </button>
-          <button id="btn-stop" class="btn btn-secondary">
-            Stop
-          </button>
+        <div class="field-group">
+          <label class="field-label">EEG Stream</label>
+          <div class="btn-group">
+            <button id="btn-start" class="btn btn-primary" style="flex: 1;">
+              Start EEG
+            </button>
+            <button id="btn-stop" class="btn btn-secondary">
+              Stop
+            </button>
+          </div>
         </div>
 
         <div class="divider"></div>
 
         <div class="field-group" style="margin-bottom: 0;">
-          <label class="field-label">Test Signal</label>
+          <label class="field-label">Camera Stream</label>
           <div class="btn-group">
-            <button id="btn-test-on" class="btn btn-secondary btn-sm" style="flex: 1;">Enable</button>
-            <button id="btn-test-off" class="btn btn-secondary btn-sm" style="flex: 1;">Disable</button>
+            <button id="btn-camera-start" class="btn btn-primary" style="flex: 1;">
+              Start Camera
+            </button>
+            <button id="btn-camera-stop" class="btn btn-secondary">
+              Stop
+            </button>
           </div>
         </div>
       </div>
@@ -713,6 +757,7 @@
         <button id="tab-timeseries" class="mode-tab active">Time Series</button>
         <button id="tab-fft" class="mode-tab">FFT</button>
         <button id="tab-bands" class="mode-tab">Bands</button>
+        <button id="tab-camera" class="mode-tab">Camera</button>
       </div>
     </header>
 
@@ -734,6 +779,39 @@
           <canvas id="timeseriesChart"></canvas>
           <canvas id="fftChart" style="display:none;"></canvas>
           <canvas id="bandsChart" style="display:none;"></canvas>
+          <div id="cameraView" style="display:none; width: 100%; height: 100%; position: relative;">
+            <img id="cameraFeed" style="width: 100%; height: 100%; object-fit: contain; border-radius: 12px;" />
+          </div>
+        </div>
+
+        <div id="cameraFeatures" style="display:none; margin-top: var(--space-lg); padding-top: var(--space-lg); border-top: 1px solid var(--border-light);">
+          <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--space-md);">
+            <div class="feature-meter">
+              <div class="field-label">Mouth</div>
+              <div class="progress-bar"><div id="meter-mouth" class="progress-fill"></div></div>
+              <div class="feature-value"><span id="val-mouth">0.00</span></div>
+            </div>
+            <div class="feature-meter">
+              <div class="field-label">Brow</div>
+              <div class="progress-bar"><div id="meter-brow" class="progress-fill"></div></div>
+              <div class="feature-value"><span id="val-brow">0.00</span></div>
+            </div>
+            <div class="feature-meter">
+              <div class="field-label">Yaw</div>
+              <div class="progress-bar"><div id="meter-yaw" class="progress-fill"></div></div>
+              <div class="feature-value"><span id="val-yaw">0.00</span></div>
+            </div>
+            <div class="feature-meter">
+              <div class="field-label">Roll</div>
+              <div class="progress-bar"><div id="meter-roll" class="progress-fill"></div></div>
+              <div class="feature-value"><span id="val-roll">0.00</span></div>
+            </div>
+            <div class="feature-meter">
+              <div class="field-label">Smile</div>
+              <div class="progress-bar"><div id="meter-smile" class="progress-fill"></div></div>
+              <div class="feature-value"><span id="val-smile">0.00</span></div>
+            </div>
+          </div>
         </div>
 
         <div class="chart-footer">
@@ -761,17 +839,27 @@
           </div>
 
           <div class="field-group">
-            <label class="field-label">Data Format</label>
+            <label class="field-label">EEG Data Format</label>
             <div class="toggle-group">
-              <button id="osc-raw-toggle" class="toggle-btn active">Raw</button>
+              <button id="osc-raw-toggle" class="toggle-btn active">Timeseries</button>
               <button id="osc-bands-toggle" class="toggle-btn">Bands</button>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Camera CV</label>
+            <div class="toggle-group">
+              <button id="osc-camera-toggle" class="toggle-btn active">FaceSynth</button>
+            </div>
+            <div class="helper-text" style="margin-top: 8px;">
+              Sends facial features to /faceSynth/* and /cv/face/*
             </div>
           </div>
 
           <div class="divider"></div>
 
           <div class="helper-text">
-            Stream EEG data via OSC to external applications (e.g., Max/MSP, TouchDesigner, Pure Data)
+            Stream data via OSC to external applications (Max/MSP, TouchDesigner, Pure Data, etc.)
           </div>
 
           <div style="margin-top: var(--space-md);">
@@ -790,9 +878,11 @@
     const UPDATE_INTERVAL_MS = 50;  // 50ms = 20 updates/second for smooth visualization
 
     let ws = null;
+    let cameraWs = null;
     let currentMode = "timeseries";
     let connected = false;
     let streaming = false;
+    let cameraRunning = false;
     let oscEnabled = false;
     let oscSendRaw = true;
     let oscSendBands = false;
@@ -800,6 +890,7 @@
     const statusDot = document.getElementById("status-dot");
     const statusSub = document.getElementById("status-subtext");
     const streamPill = document.getElementById("stream-pill");
+    const cameraPill = document.getElementById("camera-pill");
     const chipMode = document.getElementById("chip-mode");
     const chipOsc = document.getElementById("chip-osc");
     const globalError = document.getElementById("global-error");
@@ -847,8 +938,15 @@
         streamPill.textContent = connected ? "Ready" : "Idle";
         streamPill.classList.remove("active");
       }
+      if (cameraRunning) {
+        cameraPill.textContent = "Streaming";
+        cameraPill.classList.add("active");
+      } else {
+        cameraPill.textContent = "Ready";
+        cameraPill.classList.remove("active");
+      }
       chipMode.textContent = streaming
-        ? `Streaming: ${currentMode === "timeseries" ? "time series" : currentMode === "fft" ? "FFT" : "frequency bands"}`
+        ? `Streaming: ${currentMode === "timeseries" ? "time series" : currentMode === "fft" ? "FFT" : currentMode === "camera" ? "camera" : "frequency bands"}`
         : "Streaming: stopped";
     }
 
@@ -957,12 +1055,30 @@
       setStatus();
     };
 
-    document.getElementById("btn-test-on").onclick = async () => {
-      await postJSON("/api/test_signal", { on: true });
+    // Camera buttons
+    document.getElementById("btn-camera-start").onclick = async () => {
+      hideMessages();
+      try {
+        const json = await postJSON("/api/camera/start", { camera_index: 0 });
+        if (json.status === "ok") {
+          cameraRunning = true;
+          openCameraWS();
+          showSuccess("Camera started successfully");
+        } else {
+          showError(`Failed to start camera: ${json.message || "Unknown error"}`);
+        }
+      } catch (error) {
+        showError(`Failed to start camera: ${error.message}`);
+      }
+      setStatus();
     };
 
-    document.getElementById("btn-test-off").onclick = async () => {
-      await postJSON("/api/test_signal", { on: false });
+    document.getElementById("btn-camera-stop").onclick = async () => {
+      await postJSON("/api/camera/stop", {});
+      cameraRunning = false;
+      closeCameraWS();
+      showSuccess("Camera stopped");
+      setStatus();
     };
 
     // OSC toggles
@@ -1005,9 +1121,11 @@
     const tabTS = document.getElementById("tab-timeseries");
     const tabFFT = document.getElementById("tab-fft");
     const tabBands = document.getElementById("tab-bands");
+    const tabCamera = document.getElementById("tab-camera");
     tabTS.onclick = () => switchMode("timeseries");
     tabFFT.onclick = () => switchMode("fft");
     tabBands.onclick = () => switchMode("bands");
+    tabCamera.onclick = () => switchMode("camera");
 
     function switchMode(mode) {
       if (mode === currentMode) return;
@@ -1015,6 +1133,7 @@
       tabTS.classList.toggle("active", mode === "timeseries");
       tabFFT.classList.toggle("active", mode === "fft");
       tabBands.classList.toggle("active", mode === "bands");
+      tabCamera.classList.toggle("active", mode === "camera");
 
       if (mode === "timeseries") {
         visualTitle.textContent = "Time Series";
@@ -1022,23 +1141,37 @@
         document.getElementById("timeseriesChart").style.display = "block";
         document.getElementById("fftChart").style.display = "none";
         document.getElementById("bandsChart").style.display = "none";
+        document.getElementById("cameraView").style.display = "none";
+        document.getElementById("cameraFeatures").style.display = "none";
       } else if (mode === "fft") {
         visualTitle.textContent = "FFT Spectrum";
         visualSubtitle.textContent = "Real-time frequency domain analysis using Fast Fourier Transform";
         document.getElementById("timeseriesChart").style.display = "none";
         document.getElementById("fftChart").style.display = "block";
         document.getElementById("bandsChart").style.display = "none";
+        document.getElementById("cameraView").style.display = "none";
+        document.getElementById("cameraFeatures").style.display = "none";
+      } else if (mode === "camera") {
+        visualTitle.textContent = "Camera / FaceSynth";
+        visualSubtitle.textContent = "Real-time facial feature tracking with OSC output";
+        document.getElementById("timeseriesChart").style.display = "none";
+        document.getElementById("fftChart").style.display = "none";
+        document.getElementById("bandsChart").style.display = "none";
+        document.getElementById("cameraView").style.display = "block";
+        document.getElementById("cameraFeatures").style.display = "block";
       } else {
         visualTitle.textContent = "Frequency Bands";
         visualSubtitle.textContent = "Per-channel power distribution across delta, theta, alpha, beta, and gamma bands";
         document.getElementById("timeseriesChart").style.display = "none";
         document.getElementById("fftChart").style.display = "none";
         document.getElementById("bandsChart").style.display = "block";
+        document.getElementById("cameraView").style.display = "none";
+        document.getElementById("cameraFeatures").style.display = "none";
       }
 
       visualMeta.textContent = `Mode: ${mode} · Window: ${WINDOW_SEC.toFixed(1)}s`;
 
-      if (ws) {
+      if (ws && mode !== "camera") {
         ws.send(
           JSON.stringify({
             mode,
@@ -1339,6 +1472,65 @@
       if (ws) {
         ws.close();
         ws = null;
+      }
+    }
+
+    // Camera WebSocket
+    function openCameraWS() {
+      if (cameraWs) return;
+      const proto = window.location.protocol === "https:" ? "wss" : "ws";
+      const url = `${proto}://${window.location.host}/ws/camera`;
+      cameraWs = new WebSocket(url);
+
+      cameraWs.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.type === "camera") {
+          // Update camera feed
+          const img = document.getElementById("cameraFeed");
+          img.src = "data:image/jpeg;base64," + msg.frame;
+
+          // Update facial features
+          const features = msg.features;
+          updateFeatureMeter("mouth", features.mouth_openness || 0);
+          updateFeatureMeter("brow", features.brow_raise || 0);
+          updateFeatureMeter("yaw", (features.head_yaw || 0) * 0.5 + 0.5); // Map -1 to 1 -> 0 to 1
+          updateFeatureMeter("roll", (features.head_roll || 0) / 30 + 0.5); // Map -15 to 15 -> 0 to 1
+          updateFeatureMeter("smile", features.smile_curvature || 0);
+        } else if (msg.type === "error") {
+          errorMsg.textContent = msg.message || "Camera error.";
+          errorMsg.style.display = "block";
+        }
+      };
+
+      cameraWs.onclose = () => {
+        cameraWs = null;
+      };
+
+      cameraWs.onerror = () => {
+        errorMsg.textContent = "Camera WebSocket error.";
+        errorMsg.style.display = "block";
+      };
+    }
+
+    function closeCameraWS() {
+      if (cameraWs) {
+        cameraWs.close();
+        cameraWs = null;
+      }
+    }
+
+    function updateFeatureMeter(name, value) {
+      // Clamp value between 0 and 1
+      value = Math.max(0, Math.min(1, value));
+
+      const meter = document.getElementById(`meter-${name}`);
+      const valueSpan = document.getElementById(`val-${name}`);
+
+      if (meter) {
+        meter.style.width = `${value * 100}%`;
+      }
+      if (valueSpan) {
+        valueSpan.textContent = value.toFixed(2);
       }
     }
 

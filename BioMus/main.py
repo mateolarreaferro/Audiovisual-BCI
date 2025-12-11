@@ -4,21 +4,24 @@ import glob
 import sys
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 import asyncio
+import io
 
 from openbci_service import GanglionService
+from camera_service import CameraService
 
 app = FastAPI(title="Ganglion Studio")
 
 # Templates
 templates = Jinja2Templates(directory="templates")
 
-# Global service instance
+# Global service instances
 service = GanglionService()
+camera_service = CameraService()
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -156,7 +159,76 @@ async def api_osc_config(payload: dict):
     send_raw = bool(payload.get("send_raw", True))
     send_bands = bool(payload.get("send_bands", False))
     service.configure_osc(ip, port, enabled, send_raw, send_bands)
+    # Also configure camera OSC
+    camera_service.configure_osc(ip, port, enabled)
     return {"status": "ok"}
+
+
+# -------- Camera API --------
+
+@app.post("/api/camera/start")
+async def api_camera_start(payload: dict):
+    try:
+        camera_index = int(payload.get("camera_index", 0))
+        camera_service.start_camera(camera_index=camera_index)
+        return {"status": "ok"}
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
+
+
+@app.post("/api/camera/stop")
+async def api_camera_stop():
+    camera_service.stop_camera()
+    return {"status": "ok"}
+
+
+@app.get("/api/camera/status")
+async def api_camera_status():
+    return {
+        "running": camera_service.running,
+        "streaming": camera_service.streaming,
+    }
+
+
+@app.get("/api/camera/features")
+async def api_camera_features():
+    """Get the latest facial features"""
+    features = camera_service.get_latest_features()
+    return {"features": features}
+
+
+# -------- WebSocket for camera --------
+
+@app.websocket("/ws/camera")
+async def ws_camera(ws: WebSocket):
+    await ws.accept()
+
+    try:
+        while True:
+            if not camera_service.streaming:
+                await asyncio.sleep(0.5)
+                continue
+
+            # Get latest frame as base64 JPEG
+            frame_base64 = camera_service.get_latest_frame_base64()
+            features = camera_service.get_latest_features()
+
+            if frame_base64:
+                await ws.send_json({
+                    "type": "camera",
+                    "frame": frame_base64,
+                    "features": features
+                })
+
+            await asyncio.sleep(1/30)  # 30 FPS
+
+    except WebSocketDisconnect:
+        return
+    except Exception as e:
+        try:
+            await ws.send_json({"type": "error", "message": str(e)})
+        finally:
+            await ws.close()
 
 
 # -------- WebSocket for stream --------
