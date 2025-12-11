@@ -56,13 +56,13 @@
       --radius-xl: 16px;
       --radius-full: 9999px;
 
-      /* Spacing */
+      /* Spacing - Reduced for compact layout */
       --space-xs: 4px;
-      --space-sm: 8px;
-      --space-md: 16px;
-      --space-lg: 24px;
-      --space-xl: 32px;
-      --space-2xl: 48px;
+      --space-sm: 6px;
+      --space-md: 10px;
+      --space-lg: 14px;
+      --space-xl: 18px;
+      --space-2xl: 24px;
     }
 
     * {
@@ -75,23 +75,25 @@
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background: var(--bg-secondary);
       color: var(--text-primary);
-      min-height: 100vh;
+      height: 100vh;
       display: flex;
-      line-height: 1.6;
+      line-height: 1.5;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+      overflow: hidden;
     }
 
     /* Sidebar */
     .sidebar {
-      width: 320px;
+      width: 280px;
       background: var(--bg-primary);
       border-right: 1px solid var(--border-light);
-      padding: var(--space-xl) var(--space-lg);
+      padding: var(--space-lg) var(--space-md);
       display: flex;
       flex-direction: column;
-      gap: var(--space-xl);
+      gap: var(--space-lg);
       overflow-y: auto;
+      height: 100vh;
     }
 
     .brand {
@@ -146,11 +148,11 @@
     .section {
       display: flex;
       flex-direction: column;
-      gap: var(--space-md);
+      gap: var(--space-sm);
     }
 
     .section-label {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.1em;
@@ -160,8 +162,8 @@
     .card {
       background: var(--bg-elevated);
       border: 1px solid var(--border-light);
-      border-radius: var(--radius-lg);
-      padding: var(--space-lg);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
       box-shadow: var(--shadow-sm);
       transition: all 0.2s ease;
     }
@@ -173,8 +175,8 @@
     .card-header {
       display: flex;
       align-items: flex-start;
-      gap: 12px;
-      margin-bottom: var(--space-md);
+      gap: 10px;
+      margin-bottom: var(--space-sm);
     }
 
     .step-badge {
@@ -197,14 +199,14 @@
     }
 
     .card-title {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 600;
       color: var(--text-primary);
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
 
     .card-subtitle {
-      font-size: 13px;
+      font-size: 12px;
       color: var(--text-secondary);
       line-height: 1.4;
     }
@@ -260,12 +262,12 @@
     input[type="text"],
     input[type="number"] {
       width: 100%;
-      padding: 10px 14px;
+      padding: 8px 12px;
       border-radius: var(--radius-md);
       border: 1px solid var(--border-light);
       background: var(--bg-primary);
       color: var(--text-primary);
-      font-size: 14px;
+      font-size: 13px;
       font-family: inherit;
       transition: all 0.2s ease;
     }
@@ -286,9 +288,9 @@
     }
 
     .btn {
-      padding: 10px 20px;
+      padding: 8px 16px;
       border-radius: var(--radius-full);
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       font-family: inherit;
       cursor: pointer;
@@ -417,33 +419,34 @@
     /* Main Content */
     .main {
       flex: 1;
-      padding: var(--space-xl);
+      padding: var(--space-lg);
       display: flex;
       flex-direction: column;
-      gap: var(--space-lg);
+      gap: var(--space-md);
       overflow-y: auto;
+      height: 100vh;
     }
 
     .main-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      gap: var(--space-lg);
+      gap: var(--space-md);
       flex-wrap: wrap;
     }
 
     .main-title-group h2 {
-      font-size: 32px;
+      font-size: 24px;
       font-weight: 700;
       color: var(--text-primary);
       letter-spacing: -0.02em;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
     .main-subtitle {
-      font-size: 15px;
+      font-size: 13px;
       color: var(--text-secondary);
-      line-height: 1.6;
+      line-height: 1.5;
       max-width: 600px;
     }
 
@@ -479,36 +482,55 @@
 
     .main-grid {
       display: grid;
-      grid-template-columns: minmax(0, 2.5fr) minmax(280px, 1fr);
-      gap: var(--space-lg);
+      grid-template-columns: 1fr 320px;
+      gap: var(--space-md);
+      flex: 1;
+      min-height: 0;
+    }
+
+    .main-grid > .section {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .main-grid > .section > .card {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
     }
 
     .chart-card {
       background: var(--bg-primary);
       border: 1px solid var(--border-light);
-      border-radius: var(--radius-xl);
-      padding: var(--space-xl);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
       box-shadow: var(--shadow-md);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
     }
 
     .chart-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: var(--space-lg);
+      margin-bottom: var(--space-sm);
+      flex-shrink: 0;
     }
 
     .chart-title {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 600;
       color: var(--text-primary);
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
 
     .chart-description {
-      font-size: 13px;
+      font-size: 12px;
       color: var(--text-secondary);
-      line-height: 1.5;
+      line-height: 1.4;
     }
 
     .chart-meta {
@@ -518,12 +540,15 @@
     }
 
     .chart-container {
-      height: 400px;
+      flex: 1;
       background: var(--bg-secondary);
       border: 1px solid var(--border-light);
-      border-radius: var(--radius-lg);
-      padding: var(--space-md);
+      border-radius: var(--radius-md);
+      padding: var(--space-sm);
       position: relative;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
     }
 
     #timeseriesChart,
@@ -531,16 +556,18 @@
     #bandsChart {
       width: 100%;
       height: 100%;
+      flex: 1;
     }
 
     .chart-footer {
       display: flex;
       align-items: center;
-      gap: var(--space-md);
-      margin-top: var(--space-lg);
-      padding-top: var(--space-lg);
+      gap: var(--space-sm);
+      margin-top: var(--space-sm);
+      padding-top: var(--space-sm);
       border-top: 1px solid var(--border-light);
       flex-wrap: wrap;
+      flex-shrink: 0;
     }
 
     .badge {
@@ -642,16 +669,16 @@
     .feature-meter {
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      padding: 12px;
+      gap: 4px;
+      padding: 8px;
       background: var(--bg-secondary);
       border: 1px solid var(--border-light);
-      border-radius: var(--radius-md);
+      border-radius: var(--radius-sm);
     }
 
     .progress-bar {
       width: 100%;
-      height: 8px;
+      height: 6px;
       background: var(--bg-tertiary);
       border-radius: var(--radius-full);
       overflow: hidden;
@@ -838,27 +865,17 @@
           <canvas id="timeseriesChart"></canvas>
           <canvas id="fftChart" style="display:none;"></canvas>
           <canvas id="bandsChart" style="display:none;"></canvas>
-          <div id="cameraView" style="display:none; width: 100%; height: 100%; position: relative;">
-            <img id="cameraFeed" style="width: 100%; height: 100%; object-fit: contain; border-radius: 12px;" />
+          <div id="cameraView" style="display:none; width: 100%; flex: 1; position: relative; min-height: 0; max-height: 100%; display: flex; align-items: center; justify-content: center;">
+            <img id="cameraFeed" style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px;" />
           </div>
         </div>
 
-        <div id="cameraFeatures" style="display:none; margin-top: var(--space-lg); padding-top: var(--space-lg); border-top: 1px solid var(--border-light);">
-          <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--space-md);">
+        <div id="cameraFeatures" style="display:none; margin-top: var(--space-sm); padding-top: var(--space-sm); border-top: 1px solid var(--border-light); flex-shrink: 0;">
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-sm);">
             <div class="feature-meter">
               <div class="field-label">Mouth</div>
               <div class="progress-bar"><div id="meter-mouth" class="progress-fill"></div></div>
               <div class="feature-value"><span id="val-mouth">0.00</span></div>
-            </div>
-            <div class="feature-meter">
-              <div class="field-label">Brow</div>
-              <div class="progress-bar"><div id="meter-brow" class="progress-fill"></div></div>
-              <div class="feature-value"><span id="val-brow">0.00</span></div>
-            </div>
-            <div class="feature-meter">
-              <div class="field-label">Yaw</div>
-              <div class="progress-bar"><div id="meter-yaw" class="progress-fill"></div></div>
-              <div class="feature-value"><span id="val-yaw">0.00</span></div>
             </div>
             <div class="feature-meter">
               <div class="field-label">Roll</div>
@@ -881,7 +898,7 @@
           <div class="badge">
             OSC: <span id="chip-osc">disabled</span>
           </div>
-          <div style="margin-left: auto; display: flex; align-items: center; gap: 16px;">
+          <div id="scale-controls" style="margin-left: auto; display: flex; align-items: center; gap: 16px;">
             <div style="display: flex; align-items: center; gap: 8px;">
               <label style="font-size: 12px; color: var(--text-secondary); font-weight: 500;">Auto</label>
               <label class="toggle-switch">
@@ -1207,6 +1224,12 @@
       tabFFT.classList.toggle("active", mode === "fft");
       tabBands.classList.toggle("active", mode === "bands");
       tabCamera.classList.toggle("active", mode === "camera");
+
+      // Show/hide scale controls based on mode
+      const scaleControls = document.getElementById("scale-controls");
+      if (scaleControls) {
+        scaleControls.style.display = mode === "camera" ? "none" : "flex";
+      }
 
       if (mode === "timeseries") {
         visualTitle.textContent = "Time Series";
@@ -1671,11 +1694,9 @@
           const img = document.getElementById("cameraFeed");
           img.src = "data:image/jpeg;base64," + msg.frame;
 
-          // Update facial features
+          // Update facial features (only mouth, roll, smile)
           const features = msg.features;
           updateFeatureMeter("mouth", features.mouth_openness || 0);
-          updateFeatureMeter("brow", features.brow_raise || 0);
-          updateFeatureMeter("yaw", (features.head_yaw || 0) * 0.5 + 0.5); // Map -1 to 1 -> 0 to 1
           updateFeatureMeter("roll", (features.head_roll || 0) / 30 + 0.5); // Map -15 to 15 -> 0 to 1
           updateFeatureMeter("smile", features.smile_curvature || 0);
         } else if (msg.type === "error") {
