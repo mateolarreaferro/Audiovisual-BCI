@@ -172,6 +172,10 @@ class CameraService:
         # Compute head roll (tilt)
         eye_angle = self._angle_from_points(left_eye_outer, right_eye_outer)
         head_roll = eye_angle
+        # Normalize head roll to 0-1 range
+        # Assuming typical head tilt range is -45 to +45 degrees
+        head_roll_relative = (head_roll + 45.0) / 90.0
+        head_roll_relative = max(0.0, min(1.0, head_roll_relative))  # Clamp to 0-1
 
         # Compute smile curvature
         nose_tip = get_point(self.NOSE_TIP)
@@ -184,6 +188,7 @@ class CameraService:
             'brow_raise': float(brow_displacement),
             'head_yaw': float(head_yaw),
             'head_roll': float(head_roll),
+            'head_roll_relative': float(head_roll_relative),
             'smile_curvature': float(smile_curvature),
         }
 
