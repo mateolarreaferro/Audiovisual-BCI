@@ -260,25 +260,13 @@ class CameraService:
         self.osc.configure(ip, port, enabled, send_raw=False, send_bands=False)
 
     def osc_push_features(self, features: Dict[str, float]):
-        """Send facial features via OSC in FaceSynth-compatible format"""
+        """Send facial features via OSC using /cv namespace"""
         if not self.osc._ensure_client():
             return
 
         try:
-            # Map feature names to FaceSynth format
-            feature_mapping = {
-                'mouth_openness': 'mouth',
-                'brow_raise': 'brow',
-                'head_yaw': 'yaw',
-                'head_roll': 'roll',
-                'smile_curvature': 'smile'
-            }
-
-            # Send each feature as a separate OSC message in FaceSynth format
+            # Send each feature as a separate OSC message using /cv namespace
             for feature_name, value in features.items():
-                faceSynth_name = feature_mapping.get(feature_name, feature_name)
-                # Send to both /faceSynth and /cv/face for compatibility
-                self.osc.client.send_message(f"/faceSynth/{faceSynth_name}", value)
-                self.osc.client.send_message(f"/cv/face/{feature_name}", value)
+                self.osc.client.send_message(f"/cv/{feature_name}", value)
         except Exception as e:
             print(f"Failed to send CV features via OSC: {e}")

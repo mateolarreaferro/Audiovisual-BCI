@@ -35,7 +35,12 @@ Real-time EEG visualization for OpenBCI Ganglion with OSC output.
 - Set IP:port (default: 127.0.0.1:9000)
 - Toggle raw/bands output
 - Click **Enable OSC**
-- Messages: `/eeg/raw` and `/eeg/bands`
+- **📖 See [OSC_API.md](OSC_API.md) for complete API documentation**
+
+### Quick Reference
+- **Raw EEG:** `/biomus/raw/CH1`, `/biomus/raw/CH2`, etc.
+- **Band Powers:** `/biomus/bands/CH1/delta`, `/biomus/bands/alpha`, etc.
+- **CV Features:** `/cv/mouth_openness`, `/cv/head_yaw`, etc.
 
 ## Features
 
